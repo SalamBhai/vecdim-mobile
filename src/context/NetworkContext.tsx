@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { NativeModules, AppState, AppStateStatus } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { getAllRecords, updateRecordSyncStatus, LocalFieldRecord } from '../storage/db';
+import { getAllRecords, updateRecordSyncStatus } from '../storage/db';
 import { submitBatchRecords, BatchSyncResponse } from '../api/client';
 import { useAuth } from './AuthContext';
 
@@ -26,6 +26,43 @@ const NetworkContext = createContext<NetworkContextType>({
   syncPendingRecords: async () => ({ success: false, syncedCount: 0, message: '' }),
   refreshPendingCount: async () => 0,
 });
+
+// Dynamic check for native NetInfo binary module
+let nativeNetInfo: any = null;
+try {
+  if (NativeModules && NativeModules.RNCNetInfo) {
+    nativeNetInfo = require('@react-native-community/netinfo').default;
+  }
+} catch {
+  nativeNetInfo = null;
+}
+
+// Active HTTP probe against local backend & public 204 endpoint
+async function probeConnectivity(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const res = await fetch('http://localhost:8080/health', {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return res.ok;
+  } catch {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch('https://clients3.google.com/generate_204', {
+        method: 'HEAD',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      return res.status === 204 || res.ok;
+    } catch {
+      return false;
+    }
+  }
+}
 
 export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
@@ -128,27 +165,60 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [isOnline, currentUser, queryClient, refreshPendingCount]);
 
-  // 3. Hardware NetInfo Listener
+  // 3. Hardware & Probe Network Detection
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      setHardwareConnected(state.isConnected ?? true);
-      setHardwareReachable(state.isInternetReachable);
-      setConnectionType(state.type || 'wifi');
-    });
+    if (nativeNetInfo) {
+      // Native NetInfo module available
+      const unsubscribe = nativeNetInfo.addEventListener((state: any) => {
+        setHardwareConnected(state.isConnected ?? true);
+        setHardwareReachable(state.isInternetReachable);
+        setConnectionType(state.type || 'wifi');
+      });
 
-    // Check initial state
-    NetInfo.fetch().then((state) => {
-      setHardwareConnected(state.isConnected ?? true);
-      setHardwareReachable(state.isInternetReachable);
-      setConnectionType(state.type || 'wifi');
-    });
+      nativeNetInfo.fetch().then((state: any) => {
+        setHardwareConnected(state.isConnected ?? true);
+        setHardwareReachable(state.isInternetReachable);
+        setConnectionType(state.type || 'wifi');
+      });
 
-    return () => {
-      unsubscribe();
-    };
+      return () => {
+        unsubscribe();
+      };
+    } else {
+      // Fallback: active probe via heartbeat + AppState
+      let isMounted = true;
+
+      const checkConnectivity = async () => {
+        const reachable = await probeConnectivity();
+        if (isMounted) {
+          setHardwareConnected(reachable);
+          setHardwareReachable(reachable);
+          setConnectionType(reachable ? 'wifi' : 'none');
+        }
+      };
+
+      // Initial check
+      checkConnectivity();
+
+      // Check on AppState change (foregrounding app)
+      const appStateSub = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+        if (nextAppState === 'active') {
+          checkConnectivity();
+        }
+      });
+
+      // 6-second heartbeat interval
+      const intervalId = setInterval(checkConnectivity, 6000);
+
+      return () => {
+        isMounted = false;
+        appStateSub.remove();
+        clearInterval(intervalId);
+      };
+    }
   }, []);
 
-  // 4. Auto-Sync on Network Restoration (Transitions from Offline -> Online)
+  // 4. Auto-Sync on Network Restoration (Offline -> Online transition)
   useEffect(() => {
     if (!wasOnlineRef.current && isOnline) {
       // Reconnected! Automatically attempt sync if there are pending items
