@@ -6,6 +6,7 @@ import {
   Pressable,
   TextInput,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import {
   Search,
@@ -491,20 +492,25 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
       </ScrollView>
 
       {/* Selected Record Detail Bottom Sheet / Modal */}
-      {selectedRecord && (
-        <View className="absolute inset-0 bg-black/50 z-50 justify-end">
+      <Modal
+        visible={!!selectedRecord}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedRecord(null)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
           <Pressable
             className="flex-1"
             onPress={() => setSelectedRecord(null)}
           />
-          <View className="bg-white rounded-t-3xl p-6 border-t border-slate-200 max-h-[85%] shadow-2xl">
-            <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
-              <View>
-                <Text className="text-[18px] font-extrabold text-slate-900">
-                  {selectedRecord.lga} • {selectedRecord.ward}
+          <View className="bg-white rounded-t-[32px] px-6 pt-5 pb-6 h-[85%] shadow-2xl flex-col">
+            <View className="flex-row items-center justify-between pb-3 border-b border-slate-100 shrink-0">
+              <View className="flex-1 mr-3">
+                <Text className="text-[18px] font-extrabold text-slate-900 font-bricolage">
+                  {selectedRecord?.lga} • {selectedRecord?.ward}
                 </Text>
                 <Text className="text-[12px] text-slate-500 font-medium">
-                  State: {selectedRecord.state} • WHO Tube Test Bioassay
+                  State: {selectedRecord?.state} • WHO Tube Test Bioassay
                 </Text>
               </View>
               <Pressable
@@ -516,119 +522,126 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
             </View>
 
             <ScrollView
-              contentContainerStyle={{ paddingTop: 14, paddingBottom: 20 }}
-              showsVerticalScrollIndicator={false}
+              className="flex-1"
+              contentContainerStyle={{ paddingTop: 14, paddingBottom: 36 }}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+              bounces={true}
             >
-              {/* Sync Status Banner */}
-              <View
-                className={`p-3.5 rounded-2xl border flex-row items-center mb-3.5 ${
-                  selectedRecord.source === 'local'
-                    ? 'bg-amber-50 border-amber-200'
-                    : 'bg-emerald-50 border-emerald-200'
-                }`}
-              >
-                {selectedRecord.source === 'local' ? (
-                  <Clock size={18} color="#D97706" />
-                ) : (
-                  <CheckCircle2 size={18} color="#059669" />
-                )}
-                <View className="ml-2.5 flex-1">
-                  <Text
-                    className={`text-[12.5px] font-bold ${
-                      selectedRecord.source === 'local' ? 'text-amber-900' : 'text-emerald-900'
+              {selectedRecord && (
+                <>
+                  {/* Sync Status Banner */}
+                  <View
+                    className={`p-3.5 rounded-2xl border flex-row items-center mb-3.5 ${
+                      selectedRecord.source === 'local'
+                        ? 'bg-amber-50 border-amber-200'
+                        : 'bg-emerald-50 border-emerald-200'
                     }`}
                   >
-                    {selectedRecord.source === 'local'
-                      ? 'Staged in Offline Storage (Outbox)'
-                      : 'Synced to Server'}
-                  </Text>
-                  <Text className="text-[11px] text-slate-500 mt-0.5">
-                    UUID: {selectedRecord.id}
-                  </Text>
-                </View>
-              </View>
+                    {selectedRecord.source === 'local' ? (
+                      <Clock size={18} color="#D97706" />
+                    ) : (
+                      <CheckCircle2 size={18} color="#059669" />
+                    )}
+                    <View className="ml-2.5 flex-1">
+                      <Text
+                        className={`text-[12.5px] font-bold ${
+                          selectedRecord.source === 'local' ? 'text-amber-900' : 'text-emerald-900'
+                        }`}
+                      >
+                        {selectedRecord.source === 'local'
+                          ? 'Staged in Offline Storage (Outbox)'
+                          : 'Synced to Server'}
+                      </Text>
+                      <Text className="text-[11px] text-slate-500 mt-0.5">
+                        UUID: {selectedRecord.id}
+                      </Text>
+                    </View>
+                  </View>
 
-              {/* Bioassay Results Box */}
-              <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-3.5 shadow-xs">
-                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
-                  ENTOMOLOGICAL BIOASSAY
-                </Text>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">Insecticide Formulation</Text>
-                  <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.insecticide}</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">Vector Species</Text>
-                  <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.species}</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">Mosquitoes Exposed</Text>
-                  <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_exposed}</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">Mosquitoes Knocked Down / Dead</Text>
-                  <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_dead}</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 pt-2.5">
-                  <Text className="text-[13px] font-bold text-slate-900 font-bricolage">Calculated Mortality</Text>
-                  <Text className="text-[16px] font-black text-rose-600 font-mono">
-                    {Number(selectedRecord.mortality_pct).toFixed(1)}%
-                  </Text>
-                </View>
-              </View>
+                  {/* Bioassay Results Box */}
+                  <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-3.5 shadow-xs">
+                    <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
+                      ENTOMOLOGICAL BIOASSAY
+                    </Text>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">Insecticide Formulation</Text>
+                      <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.insecticide}</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">Vector Species</Text>
+                      <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.species}</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">Mosquitoes Exposed</Text>
+                      <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_exposed}</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">Mosquitoes Knocked Down / Dead</Text>
+                      <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_dead}</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 pt-2.5">
+                      <Text className="text-[13px] font-bold text-slate-900 font-bricolage">Calculated Mortality</Text>
+                      <Text className="text-[16px] font-black text-rose-600 font-mono">
+                        {Number(selectedRecord.mortality_pct).toFixed(1)}%
+                      </Text>
+                    </View>
+                  </View>
 
-              {/* Environmental & GIS Metadata */}
-              <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-4 shadow-xs">
-                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
-                  GIS & INTERVENTION METRICS
-                </Text>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">Larval Density</Text>
-                  <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.larval_density} /dip</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">GPS Coordinates</Text>
-                  <Text className="text-[11.5px] font-mono text-slate-700">
-                    {selectedRecord.latitude}°, {selectedRecord.longitude}°
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                  <Text className="text-[12px] text-slate-600">ITN Bednet Coverage</Text>
-                  <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.itn_use_pct ?? 65}%</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-1.5">
-                  <Text className="text-[12px] text-slate-600">IRS Spraying Covered</Text>
-                  <Text className="text-[12.5px] font-bold text-slate-900">
-                    {selectedRecord.irs_covered ? 'Yes (Active)' : 'No (Unsprayed)'}
-                  </Text>
-                </View>
-              </View>
+                  {/* Environmental & GIS Metadata */}
+                  <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-4 shadow-xs">
+                    <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
+                      GIS & INTERVENTION METRICS
+                    </Text>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">Larval Density</Text>
+                      <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.larval_density} /dip</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">GPS Coordinates</Text>
+                      <Text className="text-[11.5px] font-mono text-slate-700">
+                        {selectedRecord.latitude}°, {selectedRecord.longitude}°
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
+                      <Text className="text-[12px] text-slate-600">ITN Bednet Coverage</Text>
+                      <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.itn_use_pct ?? 65}%</Text>
+                    </View>
+                    <View className="flex-row items-center justify-between py-1.5">
+                      <Text className="text-[12px] text-slate-600">IRS Spraying Covered</Text>
+                      <Text className="text-[12.5px] font-bold text-slate-900">
+                        {selectedRecord.irs_covered ? 'Yes (Active)' : 'No (Unsprayed)'}
+                      </Text>
+                    </View>
+                  </View>
 
-              {/* Action buttons */}
-              {selectedRecord.source === 'local' ? (
-                <Pressable
-                  onPress={() => {
-                    setSelectedRecord(null);
-                    onOpenQueue();
-                  }}
-                  className="w-full py-3.5 rounded-2xl bg-amber-600 items-center justify-center shadow-xs active:bg-amber-700 mb-2"
-                >
-                  <Text className="text-white font-bold text-[13px] font-bricolage">
-                    Open Outbox & Sync to Server
-                  </Text>
-                </Pressable>
-              ) : (
-                <Pressable
-                  onPress={() => setSelectedRecord(null)}
-                  className="w-full py-3.5 rounded-2xl bg-slate-900 items-center justify-center shadow-xs active:bg-slate-800 mb-2"
-                >
-                  <Text className="text-white font-bold text-[13px] font-bricolage">Done</Text>
-                </Pressable>
+                  {/* Action buttons */}
+                  {selectedRecord.source === 'local' ? (
+                    <Pressable
+                      onPress={() => {
+                        setSelectedRecord(null);
+                        onOpenQueue();
+                      }}
+                      className="w-full py-3.5 rounded-2xl bg-amber-600 items-center justify-center shadow-xs active:bg-amber-700 mb-2"
+                    >
+                      <Text className="text-white font-bold text-[13px] font-bricolage">
+                        Open Outbox & Sync to Server
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      onPress={() => setSelectedRecord(null)}
+                      className="w-full py-3.5 rounded-2xl bg-slate-900 items-center justify-center shadow-xs active:bg-slate-800 mb-2"
+                    >
+                      <Text className="text-white font-bold text-[13px] font-bricolage">Done</Text>
+                    </Pressable>
+                  )}
+                </>
               )}
             </ScrollView>
           </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 };
