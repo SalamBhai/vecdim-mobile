@@ -92,33 +92,6 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
             </Pressable>
           </View>
 
-          {/* Sync Attribution Notice */}
-          <View className="mt-3 p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex-row items-center justify-between">
-            <View className="flex-row items-center flex-1 mr-2">
-              <View
-                className="w-7 h-7 rounded-lg items-center justify-center mr-2 shadow-xs"
-                style={{ backgroundColor: currentUser?.avatarColor || '#047857' }}
-              >
-                <Text className="text-white font-bold text-[10.5px]">
-                  {currentUser?.initials || 'EM'}
-                </Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-[11px] font-bold text-emerald-950 leading-tight">
-                  Officer: {currentUser?.name || 'Officer'} ({currentUser?.badge || 'Active'})
-                </Text>
-                <Text className="text-[10px] text-emerald-700">
-                  Transmitting as: X-User-Id: {currentUser?.id || 'u_field_03'}
-                </Text>
-              </View>
-            </View>
-            <View className="px-2 py-0.5 rounded-md bg-emerald-200/60">
-              <Text className="text-[9px] font-black text-emerald-900">
-                {currentUser?.state || 'Osun'}
-              </Text>
-            </View>
-          </View>
-
           {/* Filter Tabs: My Scans vs All Local */}
           <View className="flex-row mt-3 bg-slate-100 p-1 rounded-xl">
             <Pressable
