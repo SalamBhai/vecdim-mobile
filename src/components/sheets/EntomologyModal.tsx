@@ -6,8 +6,9 @@ import {
   Pressable,
   Modal,
   Alert,
+  TextInput,
 } from 'react-native';
-import { X, CheckCircle2, Send, User, MapPin } from 'lucide-react-native';
+import { X, CheckCircle2, Send, User, MapPin, ChevronDown, CloudOff } from 'lucide-react-native';
 import { GPSAccuracyMeter, GPSLocationData } from '../GPSAccuracyMeter';
 import { WHOMortalityBadge } from '../WHOMortalityBadge';
 import { STATES, getLGAsForState } from '../../data/lgaReference';
@@ -47,6 +48,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
   const [selectedState, setSelectedState] = useState<string>(userInitialState);
   const [selectedLga, setSelectedLga] = useState<string>(userInitialLga);
+  const [showLgaPicker, setShowLgaPicker] = useState<boolean>(false);
   const [ward, setWard] = useState<string>('Ward 04 (Oja-Oba)');
   const [habitatType, setHabitatType] = useState<string>(HABITAT_TYPES[0]);
   const [dipsCount, setDipsCount] = useState<number>(10);
@@ -255,79 +257,162 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </View>
             )}
 
-            {/* LGA Selection */}
-            <View className="mb-3">
-              <Text className="text-[10.5px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">
-                Local Government Area (LGA)
+            {/* 1. Two-Column Row: LGA Dropdown & Ward Input */}
+            <View className="flex-row gap-2.5 mb-3.5">
+              {/* LGA Dropdown */}
+              <View className="flex-1">
+                <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
+                  LGA ({selectedState.toUpperCase()})
+                </Text>
+                <Pressable
+                  onPress={() => setShowLgaPicker(!showLgaPicker)}
+                  className="border border-slate-200 rounded-2xl px-3.5 py-3 bg-white flex-row items-center justify-between shadow-xs active:bg-slate-50"
+                >
+                  <Text className="text-[13px] font-semibold text-slate-800" numberOfLines={1}>
+                    {selectedLga}
+                  </Text>
+                  <ChevronDown size={15} color="#64748B" />
+                </Pressable>
+              </View>
+
+              {/* Ward Site Input */}
+              <View className="flex-1">
+                <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
+                  WARD SITE
+                </Text>
+                <TextInput
+                  value={ward}
+                  onChangeText={setWard}
+                  className="border border-slate-200 rounded-2xl px-3.5 py-2.5 bg-white text-[13px] font-semibold text-slate-800"
+                  placeholder="e.g. Ward 04 (Oja-Oba)"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+            </View>
+
+            {/* Dropdown list when LGA picker is open */}
+            {showLgaPicker && (
+              <View className="bg-white border border-slate-200 rounded-2xl p-2 mb-3.5 shadow-lg max-h-48">
+                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+                  {getLGAsForState(selectedState).map((lga) => (
+                    <Pressable
+                      key={lga}
+                      onPress={() => {
+                        setSelectedLga(lga);
+                        setShowLgaPicker(false);
+                      }}
+                      className={`px-3 py-2 rounded-xl mb-1 ${
+                        selectedLga === lga ? 'bg-emerald-50' : 'active:bg-slate-50'
+                      }`}
+                    >
+                      <Text
+                        className={`text-[12px] ${
+                          selectedLga === lga
+                            ? 'font-bold text-emerald-800'
+                            : 'font-medium text-slate-700'
+                        }`}
+                      >
+                        {lga}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* 2. Breeding Habitat Type: 2x2 Grid */}
+            <View className="mb-3.5">
+              <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-bricolage">
+                BREEDING HABITAT TYPE
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {getLGAsForState(selectedState).map((lga) => (
-                  <Pressable
-                    key={lga}
-                    onPress={() => setSelectedLga(lga)}
-                    className={`px-3 py-1.5 mr-1.5 rounded-xl border ${
-                      selectedLga === lga
-                        ? 'bg-emerald-600 border-emerald-600'
-                        : 'bg-slate-50 border-slate-200'
+              <View className="flex-row gap-2 mb-2">
+                <Pressable
+                  onPress={() => setHabitatType(HABITAT_TYPES[0])}
+                  className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
+                    habitatType === HABITAT_TYPES[0]
+                      ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                      : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-[12px] text-center ${
+                      habitatType === HABITAT_TYPES[0]
+                        ? 'text-emerald-900 font-bold'
+                        : 'text-slate-600 font-medium'
                     }`}
                   >
-                    <Text
-                      className={`text-[11px] font-semibold ${
-                        selectedLga === lga ? 'text-white font-bold' : 'text-slate-700'
-                      }`}
-                    >
-                      {lga}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
+                    {HABITAT_TYPES[0]}
+                  </Text>
+                </Pressable>
 
-            {/* Breeding Habitat Type */}
-            <View className="mb-3">
-              <View className="flex-row items-center justify-between mb-1.5">
-                <Text className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
-                  Breeding Habitat Type
-                </Text>
-                <Text className="text-[9.5px] font-semibold text-emerald-700">
-                  {habitatType === 'Drainage / Gutter' ? 'Urban Drainage • Larviciding Target' :
-                   habitatType === 'Tyre / Container' ? 'Container Breeding • Source Reduction' :
-                   habitatType === 'Rice Field' ? 'Irrigated Agriculture • High Density' :
-                   'Natural Puddle • Vector Reservoir'}
-                </Text>
-              </View>
-              <View className="flex-row flex-wrap">
-                {HABITAT_TYPES.map((h) => (
-                  <Pressable
-                    key={h}
-                    onPress={() => setHabitatType(h)}
-                    className={`px-3 py-1.5 mr-2 mb-2 rounded-xl border ${
-                      habitatType === h
-                        ? 'bg-emerald-600 border-emerald-600 shadow-xs'
-                        : 'bg-white border-slate-200'
+                <Pressable
+                  onPress={() => setHabitatType(HABITAT_TYPES[1])}
+                  className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
+                    habitatType === HABITAT_TYPES[1]
+                      ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                      : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-[12px] text-center ${
+                      habitatType === HABITAT_TYPES[1]
+                        ? 'text-emerald-900 font-bold'
+                        : 'text-slate-600 font-medium'
                     }`}
                   >
-                    <Text
-                      className={`text-[11.5px] ${
-                        habitatType === h
-                          ? 'text-white font-bold'
-                          : 'text-slate-700 font-medium'
-                      }`}
-                    >
-                      {h}
-                    </Text>
-                  </Pressable>
-                ))}
+                    {HABITAT_TYPES[1]}
+                  </Text>
+                </Pressable>
+              </View>
+
+              <View className="flex-row gap-2">
+                <Pressable
+                  onPress={() => setHabitatType(HABITAT_TYPES[2])}
+                  className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
+                    habitatType === HABITAT_TYPES[2]
+                      ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                      : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-[12px] text-center ${
+                      habitatType === HABITAT_TYPES[2]
+                        ? 'text-emerald-900 font-bold'
+                        : 'text-slate-600 font-medium'
+                    }`}
+                  >
+                    {HABITAT_TYPES[2]}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setHabitatType(HABITAT_TYPES[3])}
+                  className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
+                    habitatType === HABITAT_TYPES[3]
+                      ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                      : 'bg-white border-slate-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-[12px] text-center ${
+                      habitatType === HABITAT_TYPES[3]
+                        ? 'text-emerald-900 font-bold'
+                        : 'text-slate-600 font-medium'
+                    }`}
+                  >
+                    {HABITAT_TYPES[3]}
+                  </Text>
+                </Pressable>
               </View>
             </View>
 
-            {/* Dips / Larvae Count Stepper */}
-            <View className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex-row items-center justify-between mb-3">
+            {/* 3. Dips / Larvae Count Stepper Card */}
+            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex-row items-center justify-between mb-3.5 shadow-xs">
               <View>
-                <Text className="text-[13px] font-bold text-slate-800">
+                <Text className="text-[13.5px] font-bold text-slate-800 font-bricolage">
                   Dips / Larvae Count
                 </Text>
-                <Text className="text-[11px] text-slate-500">
+                <Text className="text-[11.5px] text-slate-500 font-medium mt-0.5">
                   Density:{' '}
                   <Text className="font-bold text-emerald-700">
                     {larvaePerDip} / dip
@@ -338,26 +423,26 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               <View className="flex-row items-center space-x-2">
                 <Pressable
                   onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 20))}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 items-center justify-center mr-2 active:bg-slate-100"
+                  className="w-9 h-9 rounded-xl bg-white border border-slate-300 items-center justify-center mr-2 active:bg-slate-100 shadow-xs"
                 >
-                  <Text className="font-bold text-slate-700">-</Text>
+                  <Text className="font-bold text-slate-700 text-[16px]">-</Text>
                 </Pressable>
-                <Text className="text-[13px] font-extrabold w-10 text-center text-slate-900">
+                <Text className="text-[15px] font-extrabold w-11 text-center text-slate-900 font-mono">
                   {totalLarvae}
                 </Text>
                 <Pressable
                   onPress={() => setTotalLarvae(totalLarvae + 20)}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 items-center justify-center ml-2 active:bg-slate-100"
+                  className="w-9 h-9 rounded-xl bg-white border border-slate-300 items-center justify-center ml-2 active:bg-slate-100 shadow-xs"
                 >
-                  <Text className="font-bold text-slate-700">+</Text>
+                  <Text className="font-bold text-slate-700 text-[16px]">+</Text>
                 </Pressable>
               </View>
             </View>
 
-            {/* WHO Bioassay Tube-Test Calculation */}
-            <View className="p-3 bg-slate-50 rounded-2xl border border-slate-200 mb-3">
-              <Text className="text-[12px] font-bold text-slate-800 uppercase mb-2">
-                WHO Tube-Test Bioassay
+            {/* 4. WHO Bioassay Tube-Test Calculation */}
+            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5">
+              <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-bricolage">
+                WHO TUBE-TEST BIOASSAY
               </Text>
               <View className="flex-row mb-2">
                 <View className="flex-1 mr-2">
@@ -377,36 +462,25 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               <WHOMortalityBadge nExposed={nExposed} nDead={nDead} />
             </View>
 
-            {/* GPS Accuracy & Geofence Validator */}
-            <GPSAccuracyMeter
-              selectedState={selectedState}
-              selectedLga={selectedLga}
-              initialLat={currentUser?.defaultLat || 7.7827}
-              initialLon={currentUser?.defaultLon || 4.5418}
-              onLocationChange={handleLocationChange}
-            />
-
-            {/* Geofence confirmation */}
-            <View className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex-row items-center space-x-2 mb-4">
+            {/* 5. GPS Geofence Confirmation Bar */}
+            <View className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex-row items-center mb-3.5">
               <CheckCircle2 size={16} color="#059669" />
-              <Text className="text-[11px] font-medium text-emerald-800 ml-2">
-                GPS Validated: Inside {selectedLga} ({selectedState}) centroid (±{gpsData.accuracy || 6.5}m).
+              <Text className="text-[11.5px] font-medium text-emerald-800 ml-2">
+                GPS Validated: Inside {selectedLga} geofence (±{gpsData.accuracy || 5.8}m).
               </Text>
             </View>
 
-            {/* Submit Button */}
+            {/* 6. Action Button: Save to Offline Queue */}
             <Pressable
               onPress={handleSubmit}
               disabled={isSubmitting || gpsData.isBlocked}
               className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md ${
-                gpsData.isBlocked ? 'bg-slate-300' : 'bg-emerald-600 active:bg-emerald-700'
+                gpsData.isBlocked ? 'bg-slate-300' : 'bg-[#D97706] active:bg-[#B45309]'
               }`}
             >
-              <Send size={16} color="#FFFFFF" />
-              <Text className="text-white font-bold text-[13px] ml-2">
-                {isSubmitting
-                  ? 'Staging Record...'
-                  : `Queue Scan for ${currentUser?.firstName || 'Officer'}`}
+              <CloudOff size={16} color="#FFFFFF" />
+              <Text className="text-white font-bold text-[14px] ml-2 font-bricolage">
+                {isSubmitting ? 'Staging Record...' : 'Save to Offline Queue'}
               </Text>
             </Pressable>
           </ScrollView>

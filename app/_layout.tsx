@@ -3,6 +3,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Stack, SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
+import {
+  BricolageGrotesque_400Regular,
+  BricolageGrotesque_600SemiBold,
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
 import { AuthProvider } from '../src/context/AuthContext';
 import '../src/global.css';
 
@@ -14,6 +20,10 @@ export default function RootLayout() {
     'Inter-Medium': require('../assets/fonts/Inter-Medium.ttf'),
     'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.ttf'),
     'Inter-Bold': require('../assets/fonts/Inter-Bold.ttf'),
+    'BricolageGrotesque-Regular': BricolageGrotesque_400Regular,
+    'BricolageGrotesque-SemiBold': BricolageGrotesque_600SemiBold,
+    'BricolageGrotesque-Bold': BricolageGrotesque_700Bold,
+    'BricolageGrotesque-ExtraBold': BricolageGrotesque_800ExtraBold,
   });
 
   useEffect(() => {

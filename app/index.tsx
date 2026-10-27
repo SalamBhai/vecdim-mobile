@@ -32,6 +32,7 @@ import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
 import { TransectRouteMap } from '../src/components/TransectRouteMap';
 import { SurveysTabScreen } from '../src/components/SurveysTabScreen';
 import { EntomologyModal } from '../src/components/sheets/EntomologyModal';
+import { NtdModal } from '../src/components/sheets/NtdModal';
 import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
 import { Dhis2Modal } from '../src/components/sheets/Dhis2Modal';
@@ -70,7 +71,7 @@ export default function MainAppScreen() {
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
-    'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
+    'entomology' | 'ntd' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
   >(null);
 
   // Load live server records scoped to this authenticated officer
@@ -188,7 +189,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
 
           {/* Action 2: NTD Host */}
           <Pressable
-            onPress={() => setActiveModal('entomology')}
+            onPress={() => setActiveModal('ntd')}
             className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
             <View className="w-10 h-10 rounded-xl bg-cyan-50 items-center justify-center mb-1.5">
@@ -486,6 +487,12 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
       {/* 3. SLIDE-UP MODALS */}
       <EntomologyModal
         visible={activeModal === 'entomology'}
+        onClose={() => setActiveModal(null)}
+        onRecordSaved={handleRefreshAll}
+      />
+
+      <NtdModal
+        visible={activeModal === 'ntd'}
         onClose={() => setActiveModal(null)}
         onRecordSaved={handleRefreshAll}
       />

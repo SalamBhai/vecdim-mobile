@@ -77,11 +77,11 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
           {/* Header */}
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
             <View>
-              <Text className="text-[17px] font-extrabold text-slate-900">
+              <Text className="text-[19px] font-extrabold text-slate-900 font-bricolage">
                 Offline Local Queue
               </Text>
-              <Text className="text-[11px] text-slate-500">
-                ODK Cache ({allPending.length} pending total)
+              <Text className="text-[11.5px] text-slate-400 font-medium mt-0.5">
+                Persistent Device Cache
               </Text>
             </View>
             <Pressable
@@ -153,15 +153,13 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 12 }}>
             {displayRecords.length === 0 ? (
-              <View className="py-8 items-center justify-center">
-                <CheckCircle2 size={36} color="#10B981" />
-                <Text className="text-[14px] font-bold text-slate-800 mt-2">
-                  {filterMode === 'mine'
-                    ? 'No pending scans for your profile'
-                    : 'Offline queue is completely empty'}
+              <View className="py-12 items-center justify-center">
+                <CheckCircle2 size={40} color="#10B981" />
+                <Text className="text-[16px] font-extrabold text-slate-900 mt-3 font-bricolage text-center">
+                  Offline queue is empty
                 </Text>
-                <Text className="text-[11px] text-slate-400 mt-1 text-center">
-                  All entomology surveys have been synchronized with the Go backend.
+                <Text className="text-[12px] text-slate-400 mt-1 text-center max-w-[280px]">
+                  Toggle offline mode in the navbar to test offline caching.
                 </Text>
               </View>
             ) : (
