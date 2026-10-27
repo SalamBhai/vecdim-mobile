@@ -30,6 +30,7 @@ import { DemoUser } from '../src/data/demoUsers';
 import { LoginScreen } from '../src/screens/LoginScreen';
 import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
 import { TransectRouteMap } from '../src/components/TransectRouteMap';
+import { SurveysTabScreen } from '../src/components/SurveysTabScreen';
 import { EntomologyModal } from '../src/components/sheets/EntomologyModal';
 import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
@@ -67,6 +68,7 @@ export default function MainAppScreen() {
 // -------------------------------------------------------------
 
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
+  const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
   >(null);
@@ -115,12 +117,13 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
     <View className="flex-1 bg-[#F8FAFC]">
       {/* 1. Top Safe Area Container */}
       <SafeAreaView className="flex-1" edges={['top']}>
-        {/* Scrollable Screen Content */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 }}
-          className="flex-1"
-        >
+        {activeTab === 'home' ? (
+          /* Scrollable Home Screen Content */
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 }}
+            className="flex-1"
+          >
           {/* Header Profile Bar */}
           <View className="flex-row items-center justify-between mb-4">
             <Pressable
@@ -253,11 +256,19 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 <ActivityIndicator size="small" color="#059669" className="ml-2" />
               )}
             </View>
-            <Pressable onPress={() => setActiveModal('queue')}>
-              <Text className="text-[12px] font-bold text-emerald-600">
-                Outbox ({pendingLocalRecords.length})
-              </Text>
-            </Pressable>
+            <View className="flex-row items-center gap-2">
+              <Pressable onPress={() => setActiveModal('queue')}>
+                <Text className="text-[12px] font-bold text-amber-600">
+                  Outbox ({pendingLocalRecords.length})
+                </Text>
+              </Pressable>
+              <Text className="text-slate-300">•</Text>
+              <Pressable onPress={() => setActiveTab('surveys')}>
+                <Text className="text-[12px] font-bold text-emerald-600">
+                  View All →
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* Staged pending local scans first */}
@@ -370,26 +381,62 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           )}
         </View>
         </ScrollView>
+        ) : (
+          /* Dedicated Surveys Feed & Explorer View */
+          <SurveysTabScreen
+            currentUser={currentUser}
+            serverRecords={serverRecords}
+            pendingLocalRecords={pendingLocalRecords}
+            loadingServer={loadingServer}
+            onRefresh={handleRefreshAll}
+            onOpenCapture={() => setActiveModal('entomology')}
+            onOpenQueue={() => setActiveModal('queue')}
+            onOpenAlerts={() => setActiveModal('alerts')}
+          />
+        )}
       </SafeAreaView>
 
       {/* 2. Docked Bottom Navigation Bar with Native Bottom Safe Area (Zero Overlap) */}
       <SafeAreaView edges={['bottom']} className="bg-white border-t border-slate-100 shadow-xl">
         <View className="px-6 pt-2 pb-1 flex-row items-center justify-between">
-          {/* Home */}
-          <Pressable className="items-center py-1 flex-1">
-            <HomeIcon size={20} color="#059669" strokeWidth={2.5} />
-            <Text className="text-[10px] font-bold text-emerald-700 mt-0.5">
+          {/* Home Tab */}
+          <Pressable
+            onPress={() => setActiveTab('home')}
+            className="items-center py-1 flex-1 active:opacity-75"
+          >
+            <HomeIcon
+              size={20}
+              color={activeTab === 'home' ? '#059669' : '#94A3B8'}
+              strokeWidth={activeTab === 'home' ? 2.5 : 2}
+            />
+            <Text
+              className={`text-[10px] mt-0.5 ${
+                activeTab === 'home'
+                  ? 'font-bold text-emerald-700'
+                  : 'font-medium text-slate-400'
+              }`}
+            >
               Home
             </Text>
           </Pressable>
 
-          {/* Surveys */}
+          {/* Surveys Tab */}
           <Pressable
-            onPress={() => setActiveModal('entomology')}
+            onPress={() => setActiveTab('surveys')}
             className="items-center py-1 flex-1 active:opacity-75"
           >
-            <ClipboardList size={20} color="#94A3B8" />
-            <Text className="text-[10px] font-medium text-slate-400 mt-0.5">
+            <ClipboardList
+              size={20}
+              color={activeTab === 'surveys' ? '#059669' : '#94A3B8'}
+              strokeWidth={activeTab === 'surveys' ? 2.5 : 2}
+            />
+            <Text
+              className={`text-[10px] mt-0.5 ${
+                activeTab === 'surveys'
+                  ? 'font-bold text-emerald-700'
+                  : 'font-medium text-slate-400'
+              }`}
+            >
               Surveys
             </Text>
           </Pressable>
