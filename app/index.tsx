@@ -368,6 +368,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
               </Pressable>
             </View>
           )}
+        </View>
         </ScrollView>
       </SafeAreaView>
 
