@@ -25,15 +25,15 @@ export const SentinelHeroCard: React.FC<SentinelHeroCardProps> = ({ onPressProfi
     >
       {/* Top Pill & Circular 72% Gauge */}
       <View className="flex-row items-center justify-between mb-3.5">
-        <View className="flex-row items-center bg-black/25 px-3 py-1 rounded-full border border-white/10">
+        <View className="flex-row items-center bg-black/25 px-3 py-1 rounded-full border border-white/10 shrink-0">
           <View className="w-1.5 h-1.5 rounded-full bg-emerald-300 mr-1.5" />
           <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            {state === 'National' ? '• Nationwide Surveillance • Osun • Lagos • Kano' : `• Live Surveillance • ${state}`}
+            {state === 'National' ? '• LIVE SURVEILLANCE • NATIONAL' : `• LIVE SURVEILLANCE • ${state}`}
           </Text>
         </View>
 
         {/* Circular Gauge Ring (72% target) */}
-        <View className="w-11 h-11 items-center justify-center relative">
+        <View className="w-11 h-11 items-center justify-center relative shrink-0">
           <Svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
             <Path
               stroke="rgba(255,255,255,0.2)"
@@ -61,7 +61,7 @@ export const SentinelHeroCard: React.FC<SentinelHeroCardProps> = ({ onPressProfi
         <Text className="text-[20px] font-extrabold text-white tracking-tight leading-tight">
           Sentinel Site Inspection
         </Text>
-        <Text className="text-[12px] text-white/80 font-medium mt-0.5">
+        <Text className="text-[12px] text-white/80 font-medium mt-0.5" numberOfLines={1}>
           {sentinelSite}
         </Text>
         <Text className="text-[12px] text-white/95 font-semibold mt-1">
@@ -74,22 +74,22 @@ export const SentinelHeroCard: React.FC<SentinelHeroCardProps> = ({ onPressProfi
         onPress={onPressProfile}
         className="bg-black/25 rounded-2xl p-3 flex-row items-center justify-between border border-white/10 active:bg-black/35"
       >
-        <View className="flex-row items-center flex-1 mr-2">
-          <View className="w-8 h-8 rounded-full bg-black/40 border-2 border-white/50 items-center justify-center mr-2.5 shadow-xs">
+        <View className="flex-row items-center flex-1 mr-2 min-w-0">
+          <View className="w-8 h-8 rounded-full bg-black/40 border-2 border-white/50 items-center justify-center mr-2.5 shadow-xs shrink-0">
             <Text className="text-[13px]">🔬</Text>
           </View>
-          <View className="flex-1">
+          <View className="flex-1 min-w-0">
             <Text className="text-[12px] font-bold text-white leading-tight" numberOfLines={1}>
               {officerName} • {officerBadge}
             </Text>
-            <Text className="text-[10px] text-white/75 font-medium">
+            <Text className="text-[10px] text-white/75 font-medium" numberOfLines={1}>
               {division}
             </Text>
           </View>
         </View>
 
         {/* Route compass & pin indicator */}
-        <View className="flex-row items-center space-x-1 opacity-90">
+        <View className="flex-row items-center space-x-1 opacity-90 shrink-0">
           <View className="w-1.5 h-1.5 rounded-full bg-white/70" />
           <View className="w-3 border-t border-dashed border-white/50 mx-1" />
           <Compass size={14} color="#FFFFFF" />

@@ -112,73 +112,65 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   const serverRecords: ServerRecord[] = serverData?.records || [];
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-      {/* Scrollable Screen Content */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 110 }}
-      >
-        {/* Header Profile Bar */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Pressable
-            onPress={() => setActiveModal('auth')}
-            className="flex-row items-center flex-1 mr-2 active:opacity-75"
-          >
-            <View
-              className="w-10 h-10 rounded-2xl items-center justify-center mr-3 shadow-xs"
-              style={{ backgroundColor: currentUser.avatarColor }}
-            >
-              <Text className="text-white font-extrabold text-[13.5px]">
-                {currentUser.initials}
-              </Text>
-            </View>
-            <View className="flex-1">
-              <View className="flex-row items-center">
-                <Text className="font-extrabold text-[16px] text-slate-900 leading-tight mr-1.5">
-                  Hi, {currentUser.firstName}
-                </Text>
-                <View className="px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200">
-                  <Text className="text-[9px] font-bold text-slate-700">
-                    {currentUser.badge}
-                  </Text>
-                </View>
-              </View>
-              <Text className="text-[11.5px] text-slate-500 font-medium mt-0.5" numberOfLines={1}>
-                {currentUser.state} vector surveillance grid active
-              </Text>
-            </View>
-          </Pressable>
-
-          {/* Right Header Actions */}
-          <View className="flex-row items-center space-x-2">
-            {/* Refresh Sync Button */}
+    <View className="flex-1 bg-[#F8FAFC]">
+      {/* 1. Top Safe Area Container */}
+      <SafeAreaView className="flex-1" edges={['top']}>
+        {/* Scrollable Screen Content */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 }}
+          className="flex-1"
+        >
+          {/* Header Profile Bar */}
+          <View className="flex-row items-center justify-between mb-4">
             <Pressable
-              onPress={handleRefreshAll}
-              className="w-9 h-9 rounded-full bg-slate-100 items-center justify-center mr-1.5 active:bg-slate-200"
+              onPress={() => setActiveModal('auth')}
+              className="flex-row items-center flex-1 mr-3 active:opacity-75 min-w-0"
             >
-              <RefreshCw size={15} color="#475569" />
+              <View
+                className="w-10 h-10 rounded-2xl items-center justify-center mr-3 shadow-xs shrink-0"
+                style={{ backgroundColor: currentUser.avatarColor }}
+              >
+                <Text className="text-white font-extrabold text-[13.5px]">
+                  {currentUser.initials}
+                </Text>
+              </View>
+              <View className="flex-1 min-w-0">
+                <View className="flex-row items-center">
+                  <Text className="font-extrabold text-[16px] text-slate-900 leading-tight mr-1.5" numberOfLines={1}>
+                    Hi, {currentUser.firstName}
+                  </Text>
+                  <View className="px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 shrink-0">
+                    <Text className="text-[9px] font-bold text-slate-700">
+                      {currentUser.badge}
+                    </Text>
+                  </View>
+                </View>
+                <Text className="text-[11.5px] text-slate-500 font-medium mt-0.5" numberOfLines={1}>
+                  {currentUser.state === 'National' ? 'Nationwide vector surveillance grid active' : `${currentUser.state} vector surveillance grid active`}
+                </Text>
+              </View>
             </Pressable>
 
             {/* Outbreak Notification Bell */}
             <Pressable
               onPress={() => setActiveModal('alerts')}
-              className="w-10 h-10 rounded-full bg-slate-100 items-center justify-center relative active:bg-slate-200"
+              className="w-10 h-10 rounded-full bg-slate-100 items-center justify-center relative active:bg-slate-200 shrink-0 shadow-xs"
             >
               <Bell size={18} color="#334155" />
               <View className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white" />
             </Pressable>
           </View>
-        </View>
 
         {/* 1. Sentinel Site Inspection Hero Card */}
         <SentinelHeroCard onPressProfile={() => setActiveModal('auth')} />
 
         {/* 2. Quick Action Grid (4 Buttons) */}
-        <View className="flex-row mb-4 space-x-2">
+        <View className="flex-row mb-4 gap-2">
           {/* Action 1: Malaria */}
           <Pressable
             onPress={() => setActiveModal('entomology')}
-            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center mr-1.5 shadow-xs active:bg-slate-50"
+            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
             <View className="w-10 h-10 rounded-xl bg-emerald-50 items-center justify-center mb-1.5">
               <Bug size={18} color="#059669" />
@@ -194,7 +186,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {/* Action 2: NTD Host */}
           <Pressable
             onPress={() => setActiveModal('entomology')}
-            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center mr-1.5 shadow-xs active:bg-slate-50"
+            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
             <View className="w-10 h-10 rounded-xl bg-cyan-50 items-center justify-center mb-1.5">
               <Waves size={18} color="#0891B2" />
@@ -210,7 +202,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {/* Action 3: Offline Queue */}
           <Pressable
             onPress={() => setActiveModal('queue')}
-            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center mr-1.5 shadow-xs relative active:bg-slate-50"
+            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs relative active:bg-slate-50"
           >
             {pendingLocalRecords.length > 0 && (
               <View className="absolute -top-1 -right-1 bg-amber-600 rounded-full w-4.5 h-4.5 items-center justify-center shadow-xs">
@@ -376,72 +368,74 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
               </Pressable>
             </View>
           )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
 
-      {/* 5. BOTTOM NAVIGATION BAR WITH ELEVATED CENTER FLOATING BUTTON */}
-      <View className="absolute bottom-0 inset-x-0 bg-white/95 border-t border-slate-100 px-6 pt-2 pb-5 flex-row items-center justify-between shadow-lg">
-        {/* Home */}
-        <Pressable className="items-center py-1 flex-1">
-          <HomeIcon size={20} color="#059669" strokeWidth={2.5} />
-          <Text className="text-[10px] font-bold text-emerald-700 mt-0.5">
-            Home
-          </Text>
-        </Pressable>
+      {/* 2. Docked Bottom Navigation Bar with Native Bottom Safe Area (Zero Overlap) */}
+      <SafeAreaView edges={['bottom']} className="bg-white border-t border-slate-100 shadow-xl">
+        <View className="px-6 pt-2 pb-1 flex-row items-center justify-between">
+          {/* Home */}
+          <Pressable className="items-center py-1 flex-1">
+            <HomeIcon size={20} color="#059669" strokeWidth={2.5} />
+            <Text className="text-[10px] font-bold text-emerald-700 mt-0.5">
+              Home
+            </Text>
+          </Pressable>
 
-        {/* Surveys */}
-        <Pressable
-          onPress={() => setActiveModal('entomology')}
-          className="items-center py-1 flex-1 active:opacity-75"
-        >
-          <ClipboardList size={20} color="#94A3B8" />
-          <Text className="text-[10px] font-medium text-slate-400 mt-0.5">
-            Surveys
-          </Text>
-        </Pressable>
-
-        {/* Elevated Floating Center Scan / Capture Button */}
-        <View className="items-center justify-center flex-1 -top-5">
+          {/* Surveys */}
           <Pressable
             onPress={() => setActiveModal('entomology')}
-            className="w-13 h-13 rounded-2xl bg-slate-950 items-center justify-center shadow-xl shadow-slate-950/40 active:scale-95"
-            style={{ width: 52, height: 52 }}
+            className="items-center py-1 flex-1 active:opacity-75"
           >
-            <Scan size={24} color="#FFFFFF" />
+            <ClipboardList size={20} color="#94A3B8" />
+            <Text className="text-[10px] font-medium text-slate-400 mt-0.5">
+              Surveys
+            </Text>
+          </Pressable>
+
+          {/* Elevated Floating Center Scan / Capture Button */}
+          <View className="items-center justify-center flex-1">
+            <Pressable
+              onPress={() => setActiveModal('entomology')}
+              className="w-13 h-13 rounded-2xl bg-slate-950 items-center justify-center shadow-xl shadow-slate-950/40 active:scale-95 -mt-6 border-4 border-white"
+              style={{ width: 54, height: 54 }}
+            >
+              <Scan size={22} color="#FFFFFF" strokeWidth={2.5} />
+            </Pressable>
+          </View>
+
+          {/* Alerts */}
+          <Pressable
+            onPress={() => setActiveModal('alerts')}
+            className="items-center py-1 flex-1 relative active:opacity-75"
+          >
+            <View className="relative">
+              <Flame size={20} color="#94A3B8" />
+              <View className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500" />
+            </View>
+            <Text className="text-[10px] font-medium text-slate-400 mt-0.5">
+              Alerts
+            </Text>
+          </Pressable>
+
+          {/* Profile / Officer */}
+          <Pressable
+            onPress={() => setActiveModal('auth')}
+            className="items-center py-1 flex-1 active:opacity-75"
+          >
+            <User size={20} color={activeModal === 'auth' ? '#059669' : '#94A3B8'} />
+            <Text
+              className={`text-[10px] mt-0.5 ${
+                activeModal === 'auth' ? 'font-bold text-emerald-700' : 'font-medium text-slate-400'
+              }`}
+            >
+              Profile
+            </Text>
           </Pressable>
         </View>
+      </SafeAreaView>
 
-        {/* Alerts */}
-        <Pressable
-          onPress={() => setActiveModal('alerts')}
-          className="items-center py-1 flex-1 relative active:opacity-75"
-        >
-          <View className="relative">
-            <Flame size={20} color="#94A3B8" />
-            <View className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500" />
-          </View>
-          <Text className="text-[10px] font-medium text-slate-400 mt-0.5">
-            Alerts
-          </Text>
-        </Pressable>
-
-        {/* Officer / Session Details */}
-        <Pressable
-          onPress={() => setActiveModal('auth')}
-          className="items-center py-1 flex-1 active:opacity-75"
-        >
-          <User size={20} color={activeModal === 'auth' ? '#059669' : '#94A3B8'} />
-          <Text
-            className={`text-[10px] mt-0.5 ${
-              activeModal === 'auth' ? 'font-bold text-emerald-700' : 'font-medium text-slate-400'
-            }`}
-          >
-            Officer
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* 6. SLIDE-UP MODALS */}
+      {/* 3. SLIDE-UP MODALS */}
       <EntomologyModal
         visible={activeModal === 'entomology'}
         onClose={() => setActiveModal(null)}
@@ -470,6 +464,6 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         records={localRecords}
         onUserChanged={handleRefreshAll}
       />
-    </SafeAreaView>
+    </View>
   );
 }
