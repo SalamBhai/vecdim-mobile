@@ -515,10 +515,13 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
               </Pressable>
             </View>
 
-            <ScrollView className="py-4 space-y-3.5 gap-3" showsVerticalScrollIndicator={false}>
+            <ScrollView
+              contentContainerStyle={{ paddingTop: 14, paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
               {/* Sync Status Banner */}
               <View
-                className={`p-3 rounded-2xl border flex-row items-center ${
+                className={`p-3.5 rounded-2xl border flex-row items-center mb-3.5 ${
                   selectedRecord.source === 'local'
                     ? 'bg-amber-50 border-amber-200'
                     : 'bg-emerald-50 border-emerald-200'
@@ -546,28 +549,28 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
               </View>
 
               {/* Bioassay Results Box */}
-              <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2">
+              <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-3.5 shadow-xs">
+                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
                   ENTOMOLOGICAL BIOASSAY
                 </Text>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">Insecticide Formulation</Text>
                   <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.insecticide}</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">Vector Species</Text>
                   <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.species}</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">Mosquitoes Exposed</Text>
                   <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_exposed}</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">Mosquitoes Knocked Down / Dead</Text>
                   <Text className="text-[12.5px] font-mono font-bold text-slate-900">{selectedRecord.n_dead}</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 pt-2">
-                  <Text className="text-[13px] font-bold text-slate-900">Calculated Mortality</Text>
+                <View className="flex-row items-center justify-between py-1.5 pt-2.5">
+                  <Text className="text-[13px] font-bold text-slate-900 font-bricolage">Calculated Mortality</Text>
                   <Text className="text-[16px] font-black text-rose-600 font-mono">
                     {Number(selectedRecord.mortality_pct).toFixed(1)}%
                   </Text>
@@ -575,25 +578,25 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
               </View>
 
               {/* Environmental & GIS Metadata */}
-              <View className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2">
+              <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-4 shadow-xs">
+                <Text className="text-[11px] font-bold uppercase text-slate-400 tracking-wider mb-2.5 font-bricolage">
                   GIS & INTERVENTION METRICS
                 </Text>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">Larval Density</Text>
                   <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.larval_density} /dip</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">GPS Coordinates</Text>
                   <Text className="text-[11.5px] font-mono text-slate-700">
                     {selectedRecord.latitude}°, {selectedRecord.longitude}°
                   </Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1 border-b border-slate-200/60">
+                <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                   <Text className="text-[12px] text-slate-600">ITN Bednet Coverage</Text>
                   <Text className="text-[12.5px] font-bold text-slate-900">{selectedRecord.itn_use_pct ?? 65}%</Text>
                 </View>
-                <View className="flex-row items-center justify-between py-1">
+                <View className="flex-row items-center justify-between py-1.5">
                   <Text className="text-[12px] text-slate-600">IRS Spraying Covered</Text>
                   <Text className="text-[12.5px] font-bold text-slate-900">
                     {selectedRecord.irs_covered ? 'Yes (Active)' : 'No (Unsprayed)'}
@@ -608,18 +611,18 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
                     setSelectedRecord(null);
                     onOpenQueue();
                   }}
-                  className="w-full py-3 rounded-xl bg-amber-600 items-center justify-center shadow-xs active:bg-amber-700 mt-1"
+                  className="w-full py-3.5 rounded-2xl bg-amber-600 items-center justify-center shadow-xs active:bg-amber-700 mb-2"
                 >
-                  <Text className="text-white font-bold text-[13px]">
+                  <Text className="text-white font-bold text-[13px] font-bricolage">
                     Open Outbox & Sync to Server
                   </Text>
                 </Pressable>
               ) : (
                 <Pressable
                   onPress={() => setSelectedRecord(null)}
-                  className="w-full py-3 rounded-xl bg-slate-900 items-center justify-center shadow-xs active:bg-slate-800 mt-1"
+                  className="w-full py-3.5 rounded-2xl bg-slate-900 items-center justify-center shadow-xs active:bg-slate-800 mb-2"
                 >
-                  <Text className="text-white font-bold text-[13px]">Done</Text>
+                  <Text className="text-white font-bold text-[13px] font-bricolage">Done</Text>
                 </Pressable>
               )}
             </ScrollView>
