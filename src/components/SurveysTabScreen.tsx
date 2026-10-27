@@ -16,7 +16,6 @@ import {
   MapPin,
   RefreshCw,
   Plus,
-  ShieldAlert,
   SlidersHorizontal,
   ChevronRight,
   Database,
@@ -38,7 +37,7 @@ interface SurveysTabScreenProps {
   onOpenAlerts: () => void;
 }
 
-type FilterType = 'all' | 'pending' | 'synced' | 'resistance';
+type FilterType = 'all' | 'pending' | 'synced';
 
 export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
   currentUser,
@@ -59,24 +58,19 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
     const locals = pendingLocalRecords.map((r) => ({
       ...r,
       source: 'local' as const,
-      statusLabel: 'Pending Sync (SQLite WAL)',
+      statusLabel: 'Pending Sync',
       badgeVariant: 'amber' as const,
     }));
 
     const servers = serverRecords.map((r) => ({
       ...r,
       source: 'server' as const,
-      statusLabel: 'PostGIS Synced',
+      statusLabel: 'Synced',
       badgeVariant: 'emerald' as const,
     }));
 
     return [...locals, ...servers];
   }, [pendingLocalRecords, serverRecords]);
-
-  // Count high resistance items (<90% mortality)
-  const highResistanceCount = useMemo(() => {
-    return combinedRecords.filter((r) => (r.mortality_pct ?? 0) < 90).length;
-  }, [combinedRecords]);
 
   // Filtered items based on activeFilter and searchQuery
   const filteredRecords = useMemo(() => {
@@ -84,7 +78,6 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
       // 1. Tab filter
       if (activeFilter === 'pending' && item.source !== 'local') return false;
       if (activeFilter === 'synced' && item.source !== 'server') return false;
-      if (activeFilter === 'resistance' && (item.mortality_pct ?? 0) >= 90) return false;
 
       // 2. Text search
       if (!searchQuery.trim()) return true;
@@ -172,7 +165,7 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
             </Text>
           </Pressable>
 
-          {/* Synced PostGIS */}
+          {/* Synced */}
           <Pressable
             onPress={() => setActiveFilter('synced')}
             className={`flex-1 p-2.5 rounded-2xl border items-start ${
@@ -318,27 +311,6 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
               Synced ({serverRecords.length})
             </Text>
           </Pressable>
-
-          <Pressable
-            onPress={() => setActiveFilter('resistance')}
-            className={`px-3 py-1.5 rounded-full border flex-row items-center ${
-              activeFilter === 'resistance'
-                ? 'bg-rose-600 border-rose-600'
-                : 'bg-rose-50 border-rose-200'
-            }`}
-          >
-            <ShieldAlert
-              size={11}
-              color={activeFilter === 'resistance' ? '#FFFFFF' : '#E11D48'}
-            />
-            <Text
-              className={`text-[11px] font-bold ml-1 ${
-                activeFilter === 'resistance' ? 'text-white' : 'text-rose-800'
-              }`}
-            >
-              Resistance Alert ({highResistanceCount})
-            </Text>
-          </Pressable>
         </ScrollView>
 
         {/* 5. Surveys List Content */}
@@ -416,7 +388,7 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
                           isLocal ? 'text-amber-900' : 'text-emerald-800'
                         }`}
                       >
-                        {isLocal ? 'Outbox Pending' : 'PostGIS Synced'}
+                        {isLocal ? 'Pending Sync' : 'Synced'}
                       </Text>
                     </View>
                   </View>
@@ -564,8 +536,8 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
                     }`}
                   >
                     {selectedRecord.source === 'local'
-                      ? 'Staged in Offline SQLite WAL Storage'
-                      : 'Synced to PostGIS Modulith Database'}
+                      ? 'Staged in Offline Storage (Outbox)'
+                      : 'Synced to Server'}
                   </Text>
                   <Text className="text-[11px] text-slate-500 mt-0.5">
                     UUID: {selectedRecord.id}

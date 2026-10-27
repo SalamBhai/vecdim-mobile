@@ -330,7 +330,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                     </Text>
                     <View className="px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
                       <Text className="text-[8.5px] font-bold text-emerald-800">
-                        PostGIS Synced
+                        Synced
                       </Text>
                     </View>
                   </View>
