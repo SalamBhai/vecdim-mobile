@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "VECDIM Surveillance",
+    "slug": "vecdim-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vecdim",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-dev-client",
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow VECDIM to access high-accuracy GPS coordinates for entomological field surveillance and LGA spatial proximity validation."
+        }
+      ]
+    ],
+    "jsEngine": "hermes",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.uniosun.vecdim",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.uniosun.vecdim"
+    }
+  }
+}
