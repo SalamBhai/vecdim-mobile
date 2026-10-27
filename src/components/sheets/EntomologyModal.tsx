@@ -166,7 +166,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         mortality_pct: mortalityPct,
         who_class: whoClass,
         larval_density: parseFloat(larvaePerDip),
-        urban: false,
+        urban: habitatType === 'Drainage / Gutter' || habitatType === 'Tyre / Container',
         irs_covered: true,
         itn_use_pct: 65,
         sync_status: 'pending_sync',
@@ -191,16 +191,17 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 bg-black/60 justify-end">
-        <View className="bg-white rounded-t-[32px] p-5 max-h-[90%] shadow-2xl">
+        <Pressable className="flex-1" onPress={onClose} />
+        <View className="bg-white rounded-t-[32px] px-5 pt-4 pb-6 h-[88%] shadow-2xl flex-col">
           {/* Sheet Header */}
-          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
+          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100 shrink-0">
             <View>
-              <Text className="text-[17px] font-extrabold text-slate-900">
+              <Text className="text-[18px] font-extrabold text-slate-900">
                 Malaria Entomology Survey
               </Text>
-              <Text className="text-[11px] text-slate-500">
+              <Text className="text-[11.5px] text-slate-500">
                 NMEP Protocol Form E-1
               </Text>
             </View>
@@ -212,9 +213,16 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{ paddingBottom: 40, paddingTop: 12 }}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
+            bounces={true}
+          >
             {/* Officer Attribution Pill */}
-            <View className="mt-3.5 p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between">
+            <View className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between mb-3">
               <View className="flex-row items-center flex-1 mr-2">
                 <View
                   className="w-7 h-7 rounded-lg items-center justify-center mr-2 shadow-xs"
@@ -229,7 +237,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     {currentUser?.name || 'Field Officer'} • {currentUser?.badge || 'Active'}
                   </Text>
                   <Text className="text-[10px] text-slate-500 font-medium">
-                    Attributed enumerator: {currentUser?.id || 'u_field_03'}
+                    Enumerator ID: {currentUser?.id || 'u_field_03'}
                   </Text>
                 </View>
               </View>
@@ -240,22 +248,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </View>
             </View>
 
-            {/* Assigned State Jurisdiction */}
-            <View className="mt-3 mb-3">
-              <View className="flex-row items-center justify-between mb-1.5">
-                <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  {currentUser?.role === 'uniosun' ? 'National Surveillance Grid' : 'Assigned State Jurisdiction'}
+            {/* State Selection (National Director only) or Clean Field Officer State Banner */}
+            {currentUser?.role === 'uniosun' ? (
+              <View className="mb-3">
+                <Text className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                  State
                 </Text>
-                <View className="flex-row items-center bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  <Text className="text-[10px] font-bold text-emerald-800">
-                    {currentUser?.role === 'uniosun' ? 'All States (UNIOSUN HQ)' : 'Mandated Territory'}
-                  </Text>
-                </View>
-              </View>
-
-              {currentUser?.role === 'uniosun' ? (
-                /* State Selection Chips for National Director */
-                <View className="flex-row space-x-1.5 mb-3">
+                <View className="flex-row space-x-1.5">
                   {STATES.map((s) => (
                     <Pressable
                       key={s}
@@ -267,7 +266,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                       className={`px-3 py-1.5 rounded-xl border mr-1.5 ${
                         selectedState === s
                           ? 'bg-slate-900 border-slate-900'
-                          : 'bg-white border-slate-200 active:bg-slate-50'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
                       <Text
@@ -280,33 +279,25 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     </Pressable>
                   ))}
                 </View>
-              ) : (
-                /* Locked State Card for State / Field Officers */
-                <View className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center">
-                    <View className="w-8 h-8 rounded-xl bg-emerald-600/10 border border-emerald-500/20 items-center justify-center mr-2.5">
-                      <MapPin size={16} color="#059669" />
-                    </View>
-                    <View>
-                      <Text className="text-[13px] font-extrabold text-slate-900 leading-tight">
-                        {selectedState} State
-                      </Text>
-                      <Text className="text-[10.5px] text-slate-500 font-medium">
-                        Operational zone for {currentUser?.name || 'Officer'}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="px-2 py-1 rounded-lg bg-slate-200/70">
-                    <Text className="text-[9.5px] font-bold text-slate-600 uppercase">
-                      Locked
-                    </Text>
-                  </View>
+              </View>
+            ) : (
+              <View className="flex-row items-center justify-between mb-3 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
+                <View className="flex-row items-center">
+                  <MapPin size={14} color="#059669" />
+                  <Text className="text-[12px] font-bold text-slate-800 ml-1.5">
+                    {selectedState} State
+                  </Text>
                 </View>
-              )}
+                <Text className="text-[10.5px] text-slate-500 font-medium">
+                  {currentUser?.name || 'Field Officer'}
+                </Text>
+              </View>
+            )}
 
-              {/* LGA Centroid Selection strictly within this State */}
-              <Text className="text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">
-                Target LGA Centroid ({selectedState})
+            {/* LGA Selection */}
+            <View className="mb-3">
+              <Text className="text-[10.5px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">
+                Local Government Area (LGA)
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {getLGAsForState(selectedState).map((lga) => (
@@ -321,7 +312,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                   >
                     <Text
                       className={`text-[11px] font-semibold ${
-                        selectedLga === lga ? 'text-white' : 'text-slate-700'
+                        selectedLga === lga ? 'text-white font-bold' : 'text-slate-700'
                       }`}
                     >
                       {lga}
@@ -331,27 +322,35 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </ScrollView>
             </View>
 
-            {/* Breeding Habitat Type Chips */}
+            {/* Breeding Habitat Type */}
             <View className="mb-3">
-              <Text className="text-[10px] font-bold text-slate-500 uppercase mb-1.5">
-                Breeding Habitat Type
-              </Text>
+              <View className="flex-row items-center justify-between mb-1.5">
+                <Text className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
+                  Breeding Habitat Type
+                </Text>
+                <Text className="text-[9.5px] font-semibold text-emerald-700">
+                  {habitatType === 'Drainage / Gutter' ? 'Urban Drainage • Larviciding Target' :
+                   habitatType === 'Tyre / Container' ? 'Container Breeding • Source Reduction' :
+                   habitatType === 'Rice Field' ? 'Irrigated Agriculture • High Density' :
+                   'Natural Puddle • Vector Reservoir'}
+                </Text>
+              </View>
               <View className="flex-row flex-wrap">
                 {HABITAT_TYPES.map((h) => (
                   <Pressable
                     key={h}
                     onPress={() => setHabitatType(h)}
-                    className={`px-3 py-2 mr-2 mb-2 rounded-xl border ${
+                    className={`px-3 py-1.5 mr-2 mb-2 rounded-xl border ${
                       habitatType === h
-                        ? 'bg-emerald-50 border-emerald-500'
-                        : 'bg-slate-50 border-slate-200'
+                        ? 'bg-emerald-600 border-emerald-600 shadow-xs'
+                        : 'bg-white border-slate-200'
                     }`}
                   >
                     <Text
-                      className={`text-[11px] font-medium ${
+                      className={`text-[11.5px] ${
                         habitatType === h
-                          ? 'text-emerald-900 font-bold'
-                          : 'text-slate-600'
+                          ? 'text-white font-bold'
+                          : 'text-slate-700 font-medium'
                       }`}
                     >
                       {h}

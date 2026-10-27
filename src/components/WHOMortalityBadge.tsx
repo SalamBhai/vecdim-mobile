@@ -27,20 +27,23 @@ export const WHOMortalityBadge: React.FC<WHOMortalityBadgeProps> = ({ nExposed, 
 
   return (
     <View className={`p-4 rounded-xl border ${result.badgeBg} ${result.badgeBorder} my-2`}>
+      {/* Row 1: Label on left, WHO classification badge on right */}
       <View className="flex-row items-center justify-between mb-1.5">
-        <View className="flex-row items-baseline">
-          <Text className="text-[12px] font-bold text-slate-500 uppercase tracking-wide mr-2">
-            MORTALITY RATE
-          </Text>
-          <Text className="text-[22px] font-mono font-bold text-slate-900">
-            {result.mortalityPct.toFixed(1)}%
-          </Text>
-        </View>
-
+        <Text className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider">
+          MORTALITY RATE
+        </Text>
         <Badge label={result.whoClass} variant={badgeVariant} />
       </View>
 
-      <Text className={`text-[12px] font-medium ${result.badgeText} mt-1`}>
+      {/* Row 2: Percentage */}
+      <View className="flex-row items-baseline mb-1">
+        <Text className="text-[24px] font-mono font-black text-slate-900">
+          {result.mortalityPct.toFixed(1)}%
+        </Text>
+      </View>
+
+      {/* Row 3: WHO Description */}
+      <Text className={`text-[11.5px] font-medium leading-relaxed ${result.badgeText}`}>
         {result.description}
       </Text>
     </View>
