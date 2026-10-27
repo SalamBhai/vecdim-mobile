@@ -462,13 +462,15 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               <WHOMortalityBadge nExposed={nExposed} nDead={nDead} />
             </View>
 
-            {/* 5. GPS Geofence Confirmation Bar */}
-            <View className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex-row items-center mb-3.5">
-              <CheckCircle2 size={16} color="#059669" />
-              <Text className="text-[11.5px] font-medium text-emerald-800 ml-2">
-                GPS Validated: Inside {selectedLga} geofence (±{gpsData.accuracy || 5.8}m).
-              </Text>
-            </View>
+            {/* 5. GPS Coordinates & Live Accuracy Meter */}
+            <GPSAccuracyMeter
+              selectedState={selectedState}
+              selectedLga={selectedLga}
+              initialLat={gpsData.latitude || currentUser?.defaultLat || 7.7827}
+              initialLon={gpsData.longitude || currentUser?.defaultLon || 4.5418}
+              initialAccuracy={gpsData.accuracy || 5.8}
+              onLocationChange={handleLocationChange}
+            />
 
             {/* 6. Action Button: Save to Offline Queue */}
             <Pressable

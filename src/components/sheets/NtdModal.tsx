@@ -11,6 +11,7 @@ import { X, CheckCircle2, Waves } from 'lucide-react-native';
 
 import { useAuth } from '../../context/AuthContext';
 import { saveFieldRecord, LocalFieldRecord } from '../../storage/db';
+import { GPSAccuracyMeter, GPSLocationData } from '../GPSAccuracyMeter';
 
 const WATER_SITES = [
   'Stream / River',
@@ -31,18 +32,25 @@ export const NtdModal: React.FC<NtdModalProps> = ({
   onRecordSaved,
 }) => {
   const { currentUser } = useAuth();
+  const state = currentUser?.state === 'National' || !currentUser ? 'Osun' : currentUser.state;
+  const lga = currentUser?.primaryLga || 'Osogbo';
 
   const [selectedSite, setSelectedSite] = useState<string>(WATER_SITES[0]);
   const [bulinusCount, setBulinusCount] = useState<number>(24);
   const [biomphalariaCount, setBiomphalariaCount] = useState<number>(12);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [gpsData, setGpsData] = useState<GPSLocationData>({
+    latitude: currentUser?.defaultLat || 7.7827,
+    longitude: currentUser?.defaultLon || 4.5418,
+    accuracy: 5.4,
+    isBlocked: false,
+    proximityResult: null,
+  });
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
       const uuid = 'rec_ntd_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
-      const state = currentUser?.state === 'National' || !currentUser ? 'Osun' : currentUser.state;
-      const lga = currentUser?.primaryLga || 'Osogbo';
 
       const record: LocalFieldRecord = {
         id: uuid,
@@ -51,9 +59,9 @@ export const NtdModal: React.FC<NtdModalProps> = ({
         lga,
         ward: `${selectedSite} Contact Zone`,
         collection_date: new Date().toISOString().split('T')[0],
-        latitude: currentUser?.defaultLat || 7.7827,
-        longitude: currentUser?.defaultLon || 4.5418,
-        gps_accuracy_m: 5.4,
+        latitude: gpsData.latitude || currentUser?.defaultLat || 7.7827,
+        longitude: gpsData.longitude || currentUser?.defaultLon || 4.5418,
+        gps_accuracy_m: gpsData.accuracy || 5.4,
         species: 'Bulinus globosus & Biomphalaria pfeifferi',
         insecticide: 'Niclosamide Molluscicide',
         n_exposed: bulinusCount,
@@ -249,11 +257,23 @@ export const NtdModal: React.FC<NtdModalProps> = ({
               </View>
             </View>
 
+            {/* GPS Coordinates & Accuracy Meter */}
+            <GPSAccuracyMeter
+              selectedState={state}
+              selectedLga={lga}
+              initialLat={gpsData.latitude || currentUser?.defaultLat || 7.7827}
+              initialLon={gpsData.longitude || currentUser?.defaultLon || 4.5418}
+              initialAccuracy={gpsData.accuracy || 5.4}
+              onLocationChange={setGpsData}
+            />
+
             {/* Submit NTD Survey Button */}
             <Pressable
               onPress={handleSubmit}
-              disabled={isSubmitting}
-              className="py-3.5 rounded-2xl bg-[#006D77] active:bg-[#00555D] items-center justify-center shadow-md mb-2"
+              disabled={isSubmitting || gpsData.isBlocked}
+              className={`py-3.5 rounded-2xl items-center justify-center shadow-md mb-2 ${
+                gpsData.isBlocked ? 'bg-slate-300' : 'bg-[#006D77] active:bg-[#00555D]'
+              }`}
             >
               <Text className="text-white font-bold text-[14px] font-bricolage">
                 {isSubmitting ? 'Staging NTD Record...' : 'Submit NTD Survey'}

@@ -83,6 +83,16 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
     }
   }, [selectedState, selectedLga, onLocationChange]);
 
+  useEffect(() => {
+    if (initialLat !== undefined && initialLon !== undefined && initialLat !== null && initialLon !== null) {
+      if (latitude === null || longitude === null) {
+        setLatitude(initialLat);
+        setLongitude(initialLon);
+        setAccuracy(initialAccuracy || 6.5);
+      }
+    }
+  }, [initialLat, initialLon, initialAccuracy]);
+
   // Recalculate proximity if state or LGA changes
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
@@ -132,8 +142,8 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
 
   const setDemoGPS = () => {
     const ref = getLGARef(selectedState, selectedLga);
-    const demoLat = ref ? Math.round((ref.refLat + 0.008) * 10000) / 10000 : 7.7712;
-    const demoLon = ref ? Math.round((ref.refLon + 0.005) * 10000) / 10000 : 4.5621;
+    const demoLat = ref ? Math.round((ref.refLat + 0.0014) * 10000) / 10000 : 7.7712;
+    const demoLon = ref ? Math.round((ref.refLon + 0.0008) * 10000) / 10000 : 4.5621;
     const demoAcc = 6.8;
 
     setLatitude(demoLat);
@@ -155,57 +165,66 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
   };
 
   return (
-    <View className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 mb-3.5">
+    <View className="bg-slate-50/90 rounded-2xl p-3.5 border border-slate-200/90 mb-3.5 shadow-xs">
       <View className="flex-row items-center justify-between mb-2.5">
-        <Text className="text-[13px] font-bold text-slate-700 uppercase tracking-wide">
+        <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
           GPS Coordinates & Accuracy
         </Text>
         <View className="flex-row items-center">
           <Pressable
             onPress={setDemoGPS}
-            className="mr-2 bg-teal-50 px-2 py-1 rounded-lg border border-teal-200 active:bg-teal-100"
+            className="mr-1.5 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 active:bg-emerald-100"
           >
-            <Text className="text-[11px] font-semibold text-teal-800">Demo Fix</Text>
+            <Text className="text-[10.5px] font-bold text-emerald-800 font-bricolage">Demo Fix</Text>
           </Pressable>
 
           <Pressable
             onPress={fetchGPS}
             disabled={loading}
-            className="flex-row items-center bg-white px-2.5 py-1 rounded-lg border border-slate-200 active:bg-slate-100"
+            className="flex-row items-center bg-white px-2.5 py-1 rounded-lg border border-slate-200 active:bg-slate-100 shadow-xs"
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#0D9488" />
+              <ActivityIndicator size="small" color="#059669" />
             ) : (
-              <Text className="text-[12px] font-semibold text-teal-700">Refresh GPS</Text>
+              <Text className="text-[11px] font-semibold text-slate-700 font-bricolage">Refresh</Text>
             )}
           </Pressable>
         </View>
       </View>
 
       {/* Lat/Lon readings */}
-      <View className="flex-row items-center justify-between bg-white rounded-lg p-2.5 border border-slate-200/70 mb-2.5">
+      <View className="flex-row items-center justify-between bg-white rounded-xl p-3 border border-slate-200/80 mb-2.5">
         <View className="flex-1">
-          <Text className="text-[11px] font-semibold text-slate-400">LATITUDE</Text>
-          <Text className="text-[14px] font-mono font-bold text-slate-800">
+          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LATITUDE</Text>
+          <Text className="text-[15px] font-mono font-bold text-slate-900 mt-0.5">
             {latitude !== null ? `${latitude}°` : 'Acquiring...'}
           </Text>
         </View>
-        <View className="h-6 w-px bg-slate-200 mx-2" />
+        <View className="h-7 w-px bg-slate-200 mx-3" />
         <View className="flex-1">
-          <Text className="text-[11px] font-semibold text-slate-400">LONGITUDE</Text>
-          <Text className="text-[14px] font-mono font-bold text-slate-800">
+          <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LONGITUDE</Text>
+          <Text className="text-[15px] font-mono font-bold text-slate-900 mt-0.5">
             {longitude !== null ? `${longitude}°` : 'Acquiring...'}
           </Text>
         </View>
       </View>
 
-      {/* Accuracy Status Badge */}
-      <View className="flex-row items-center justify-between">{accuracyBadge}</View>
+      {/* Accuracy Status Badge & Geofence Confirmation */}
+      <View className="flex-row items-center justify-between flex-wrap gap-1">
+        {accuracyBadge}
+        {proximity && proximity.isWithinThreshold && (
+          <View className="flex-row items-center bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <Text className="text-[10px] font-bold text-emerald-800">
+              Inside {selectedLga} geofence
+            </Text>
+          </View>
+        )}
+      </View>
 
       {/* High error warning */}
       {isBlocked && (
-        <View className="mt-2.5 bg-red-50 p-2.5 rounded-lg border border-red-200">
-          <Text className="text-[12px] font-semibold text-red-800">
+        <View className="mt-2.5 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+          <Text className="text-[11.5px] font-semibold text-rose-800">
             GPS accuracy exceeds 50m threshold (±{accuracy}m). Move away from buildings or dense canopies before submitting.
           </Text>
         </View>
@@ -213,19 +232,19 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
 
       {/* 25km LGA Proximity Alert */}
       {proximity && !proximity.isWithinThreshold && (
-        <View className="mt-2.5 bg-amber-50 p-2.5 rounded-lg border border-amber-300">
-          <Text className="text-[12px] font-bold text-amber-900">
+        <View className="mt-2.5 bg-amber-50 p-2.5 rounded-xl border border-amber-300">
+          <Text className="text-[12px] font-bold text-amber-900 font-bricolage">
             ⚠️ 25km LGA Boundary Warning
           </Text>
-          <Text className="text-[12px] text-amber-800 mt-0.5">
+          <Text className="text-[11.5px] text-amber-800 mt-0.5">
             {proximity.warningMessage}
           </Text>
         </View>
       )}
 
       {permissionError && (
-        <View className="mt-2 bg-red-50 p-2 rounded-lg border border-red-200">
-          <Text className="text-[12px] text-red-700">{permissionError}</Text>
+        <View className="mt-2 bg-rose-50 p-2 rounded-xl border border-rose-200">
+          <Text className="text-[11.5px] text-rose-700">{permissionError}</Text>
         </View>
       )}
     </View>
