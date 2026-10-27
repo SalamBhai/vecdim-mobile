@@ -102,8 +102,11 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
   return (
     <View className="flex-1 bg-[#F8FAFC]">
       <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 32 }}
+        className="flex-1"
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        alwaysBounceVertical={true}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 110 }}
       >
         {/* 1. Header Bar */}
         <View className="flex-row items-center justify-between mb-3.5">

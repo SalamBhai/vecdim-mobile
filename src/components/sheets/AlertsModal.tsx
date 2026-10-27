@@ -62,7 +62,7 @@ export const AlertsModal: React.FC<AlertsModalProps> = ({ visible, onClose }) =>
             </View>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+          <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
             {/* Alert Item 1 - Critical Surge */}
             <View className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 mb-3 shadow-xs">
               <View className="flex-row items-center justify-between mb-1">

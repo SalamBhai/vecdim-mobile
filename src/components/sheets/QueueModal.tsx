@@ -124,7 +124,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 12 }}>
+          <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 12 }}>
             {displayRecords.length === 0 ? (
               <View className="py-12 items-center justify-center">
                 <CheckCircle2 size={40} color="#10B981" />
