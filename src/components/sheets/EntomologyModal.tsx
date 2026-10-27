@@ -202,7 +202,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 Malaria Entomology Survey
               </Text>
               <Text className="text-[11.5px] text-slate-500">
-                NMEP Protocol Form E-1
+                NMEP Form E-1 • {selectedState} State
               </Text>
             </View>
             <Pressable
@@ -216,40 +216,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
           <ScrollView
             className="flex-1"
             showsVerticalScrollIndicator={true}
-            contentContainerStyle={{ paddingBottom: 40, paddingTop: 12 }}
+            contentContainerStyle={{ paddingBottom: 40, paddingTop: 14 }}
             keyboardShouldPersistTaps="handled"
             nestedScrollEnabled={true}
             bounces={true}
           >
-            {/* Officer Attribution Pill */}
-            <View className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between mb-3">
-              <View className="flex-row items-center flex-1 mr-2">
-                <View
-                  className="w-7 h-7 rounded-lg items-center justify-center mr-2 shadow-xs"
-                  style={{ backgroundColor: currentUser?.avatarColor || '#047857' }}
-                >
-                  <Text className="text-white font-bold text-[11px]">
-                    {currentUser?.initials || 'EM'}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[11.5px] font-bold text-slate-900 leading-tight">
-                    {currentUser?.name || 'Field Officer'} • {currentUser?.badge || 'Active'}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 font-medium">
-                    Enumerator ID: {currentUser?.id || 'u_field_03'}
-                  </Text>
-                </View>
-              </View>
-              <View className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300">
-                <Text className="text-[9px] font-black text-emerald-800 uppercase">
-                  Active
-                </Text>
-              </View>
-            </View>
-
-            {/* State Selection (National Director only) or Clean Field Officer State Banner */}
-            {currentUser?.role === 'uniosun' ? (
+            {/* State Selection (National Director only) */}
+            {currentUser?.role === 'uniosun' && (
               <View className="mb-3">
                 <Text className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                   State
@@ -279,18 +252,6 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     </Pressable>
                   ))}
                 </View>
-              </View>
-            ) : (
-              <View className="flex-row items-center justify-between mb-3 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200">
-                <View className="flex-row items-center">
-                  <MapPin size={14} color="#059669" />
-                  <Text className="text-[12px] font-bold text-slate-800 ml-1.5">
-                    {selectedState} State
-                  </Text>
-                </View>
-                <Text className="text-[10.5px] text-slate-500 font-medium">
-                  {currentUser?.name || 'Field Officer'}
-                </Text>
               </View>
             )}
 
