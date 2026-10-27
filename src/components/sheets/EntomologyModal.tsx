@@ -72,9 +72,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   // Synchronize state/LGA defaults when currentUser changes or modal opens
   useEffect(() => {
     if (visible) {
-      const assigned = currentUser?.state && currentUser.state !== 'National' ? currentUser.state : 'Osun';
+      const isNational = currentUser?.role === 'uniosun' || currentUser?.state === 'National';
+      const assigned = isNational ? 'Osun' : (currentUser?.state || 'Osun');
       setSelectedState(assigned);
-      setSelectedLga(currentUser?.primaryLga || (getLGAsForState(assigned)[0] || 'Osogbo'));
+      setSelectedLga(currentUser?.primaryLga && !currentUser.primaryLga.includes('HQ') ? currentUser.primaryLga : (getLGAsForState(assigned)[0] || 'Osogbo'));
       setGpsData({
         latitude: currentUser?.defaultLat || 7.7827,
         longitude: currentUser?.defaultLon || 4.5418,
@@ -83,13 +84,12 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         proximityResult: null,
       });
 
-      // Load draft if exists
+      // Load draft strictly scoped to this authenticated user
       (async () => {
-        const draft = await getFormDraft();
+        const draft = await getFormDraft(currentUser?.id);
         if (draft && draft.formData) {
           const d = draft.formData;
-          // Only national coordinator can restore custom state from draft
-          if (currentUser?.state === 'National' && d.selectedState) {
+          if (isNational && d.selectedState) {
             setSelectedState(d.selectedState);
           }
           if (d.selectedLga) setSelectedLga(d.selectedLga);
@@ -103,7 +103,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
     }
   }, [visible, currentUser]);
 
-  // Debounced autosave
+  // Debounced autosave strictly scoped to this officer
   useEffect(() => {
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(async () => {
@@ -117,13 +117,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         nDead,
         species,
         insecticide,
-      });
+      }, currentUser?.id);
     }, 1500);
 
     return () => {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
-  }, [selectedState, selectedLga, ward, habitatType, totalLarvae, nExposed, nDead, species, insecticide]);
+  }, [selectedState, selectedLga, ward, habitatType, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
 
   const handleLocationChange = useCallback((data: GPSLocationData) => {
     setGpsData(data);
@@ -176,7 +176,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
       };
 
       await saveFieldRecord(record);
-      await clearFormDraft();
+      await clearFormDraft(currentUser?.id);
       setIsSubmitting(false);
       onRecordSaved();
       onClose();
@@ -240,40 +240,69 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </View>
             </View>
 
-            {/* Assigned State Jurisdiction (Bound strictly to officer's assigned territory) */}
+            {/* Assigned State Jurisdiction */}
             <View className="mt-3 mb-3">
               <View className="flex-row items-center justify-between mb-1.5">
                 <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  Assigned State Jurisdiction
+                  {currentUser?.role === 'uniosun' ? 'National Surveillance Grid' : 'Assigned State Jurisdiction'}
                 </Text>
                 <View className="flex-row items-center bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                   <Text className="text-[10px] font-bold text-emerald-800">
-                    Mandated Territory
+                    {currentUser?.role === 'uniosun' ? 'All States (UNIOSUN HQ)' : 'Mandated Territory'}
                   </Text>
                 </View>
               </View>
 
-              {/* Locked State Card */}
-              <View className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between mb-3">
-                <View className="flex-row items-center">
-                  <View className="w-8 h-8 rounded-xl bg-emerald-600/10 border border-emerald-500/20 items-center justify-center mr-2.5">
-                    <MapPin size={16} color="#059669" />
+              {currentUser?.role === 'uniosun' ? (
+                /* State Selection Chips for National Director */
+                <View className="flex-row space-x-1.5 mb-3">
+                  {STATES.map((s) => (
+                    <Pressable
+                      key={s}
+                      onPress={() => {
+                        setSelectedState(s);
+                        const lgas = getLGAsForState(s);
+                        if (lgas.length > 0) setSelectedLga(lgas[0]);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl border mr-1.5 ${
+                        selectedState === s
+                          ? 'bg-slate-900 border-slate-900'
+                          : 'bg-white border-slate-200 active:bg-slate-50'
+                      }`}
+                    >
+                      <Text
+                        className={`text-[11px] font-bold ${
+                          selectedState === s ? 'text-white' : 'text-slate-700'
+                        }`}
+                      >
+                        {s} State
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                /* Locked State Card for State / Field Officers */
+                <View className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex-row items-center justify-between mb-3">
+                  <View className="flex-row items-center">
+                    <View className="w-8 h-8 rounded-xl bg-emerald-600/10 border border-emerald-500/20 items-center justify-center mr-2.5">
+                      <MapPin size={16} color="#059669" />
+                    </View>
+                    <View>
+                      <Text className="text-[13px] font-extrabold text-slate-900 leading-tight">
+                        {selectedState} State
+                      </Text>
+                      <Text className="text-[10.5px] text-slate-500 font-medium">
+                        Operational zone for {currentUser?.name || 'Officer'}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text className="text-[13px] font-extrabold text-slate-900 leading-tight">
-                      {selectedState} State
-                    </Text>
-                    <Text className="text-[10.5px] text-slate-500 font-medium">
-                      Operational zone for {currentUser?.name || 'Officer'}
+                  <View className="px-2 py-1 rounded-lg bg-slate-200/70">
+                    <Text className="text-[9.5px] font-bold text-slate-600 uppercase">
+                      Locked
                     </Text>
                   </View>
                 </View>
-                <View className="px-2 py-1 rounded-lg bg-slate-200/70">
-                  <Text className="text-[9.5px] font-bold text-slate-600 uppercase">
-                    Locked
-                  </Text>
-                </View>
-              </View>
+              )}
 
               {/* LGA Centroid Selection strictly within this State */}
               <Text className="text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">

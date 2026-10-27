@@ -175,13 +175,14 @@ export async function clearActiveUserId(): Promise<void> {
 // PUBLIC UNIFIED API (Hybrid: Web localStorage + Native SQLite)
 // -------------------------------------------------------------
 
-export async function saveFormDraft(formData: Record<string, any>): Promise<void> {
+export async function saveFormDraft(formData: Record<string, any>, userId?: string): Promise<void> {
   const now = new Date().toISOString();
+  const draftKey = userId ? `active_draft_${userId}` : 'active_nmep_e1_draft';
 
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem(
-        WEB_DRAFT_KEY,
+        `${WEB_DRAFT_KEY}_${userId || 'default'}`,
         JSON.stringify({ formData, updatedAt: now })
       );
     }
@@ -192,16 +193,18 @@ export async function saveFormDraft(formData: Record<string, any>): Promise<void
   const jsonStr = JSON.stringify(formData);
   await db.runAsync(
     `INSERT INTO drafts (id, form_data, updated_at) 
-     VALUES ('active_nmep_e1_draft', ?, ?)
+     VALUES (?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET form_data = excluded.form_data, updated_at = excluded.updated_at;`,
-    [jsonStr, now]
+    [draftKey, jsonStr, now]
   );
 }
 
-export async function getFormDraft(): Promise<{ formData: Record<string, any>; updatedAt: string } | null> {
+export async function getFormDraft(userId?: string): Promise<{ formData: Record<string, any>; updatedAt: string } | null> {
+  const draftKey = userId ? `active_draft_${userId}` : 'active_nmep_e1_draft';
+
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const raw = window.localStorage.getItem(WEB_DRAFT_KEY);
+      const raw = window.localStorage.getItem(`${WEB_DRAFT_KEY}_${userId || 'default'}`);
       if (raw) {
         try {
           return JSON.parse(raw);
@@ -215,7 +218,8 @@ export async function getFormDraft(): Promise<{ formData: Record<string, any>; u
 
   const db = await getNativeDB();
   const row = await db.getFirstAsync<{ form_data: string; updated_at: string }>(
-    `SELECT form_data, updated_at FROM drafts WHERE id = 'active_nmep_e1_draft';`
+    `SELECT form_data, updated_at FROM drafts WHERE id = ?;`,
+    [draftKey]
   );
 
   if (!row) return null;
@@ -230,16 +234,19 @@ export async function getFormDraft(): Promise<{ formData: Record<string, any>; u
   }
 }
 
-export async function clearFormDraft(): Promise<void> {
+export async function clearFormDraft(userId?: string): Promise<void> {
+  const draftKey = userId ? `active_draft_${userId}` : 'active_nmep_e1_draft';
+
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(`${WEB_DRAFT_KEY}_${userId || 'default'}`);
       window.localStorage.removeItem(WEB_DRAFT_KEY);
     }
     return;
   }
 
   const db = await getNativeDB();
-  await db.runAsync(`DELETE FROM drafts WHERE id = 'active_nmep_e1_draft';`);
+  await db.runAsync(`DELETE FROM drafts WHERE id = ? OR id = 'active_nmep_e1_draft';`, [draftKey]);
 }
 
 export async function saveFieldRecord(record: LocalFieldRecord): Promise<void> {

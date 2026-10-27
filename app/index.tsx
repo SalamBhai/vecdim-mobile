@@ -79,6 +79,15 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   } = useQuery({
     queryKey: ['serverRecords', currentUser.id],
     queryFn: async () => {
+      // National Director has nationwide oversight: fetch all records across Osun, Lagos, Kano
+      if (currentUser.role === 'uniosun' || currentUser.state === 'National') {
+        return await fetchServerRecords(currentUser.id);
+      }
+      // State Coordinator fetches all records in their state
+      if (currentUser.role === 'vecdim') {
+        return await fetchServerRecords(currentUser.id, currentUser.state);
+      }
+      // Field officer fetches their records scoped to their jurisdiction
       return await fetchServerRecords(currentUser.id, currentUser.state, currentUser.primaryLga);
     },
     enabled: !!currentUser.id,

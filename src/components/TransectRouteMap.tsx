@@ -17,13 +17,15 @@ export const TransectRouteMap: React.FC<TransectRouteMapProps> = ({ onPressDetai
       ? { l1: 'Ikorodu', l2: 'Alausa', l3: 'Epe', l4: 'Badagry', sector: 'Lagos Sector 02 (Urban)' }
       : state === 'Kano'
       ? { l1: 'Nasarawa', l2: 'Dala', l3: 'Gwale', l4: 'Bompai', sector: 'Kano Sector 01 (Arid)' }
+      : state === 'National'
+      ? { l1: 'Osun HQ', l2: 'Lagos Grid', l3: 'Kano North', l4: 'Abuja NMEP', sector: 'Tri-State Vector Corridor' }
       : { l1: 'Osogbo', l2: 'Oja-Oba', l3: 'Olorunda', l4: 'Ede South', sector: 'Osun Sector 04 (Rainforest)' };
 
   return (
     <View className="mb-4">
       <View className="flex-row items-center justify-between mb-2">
         <Text className="text-[14px] font-bold text-slate-900 tracking-tight">
-          Active Transect Route ({state})
+          {state === 'National' ? 'National Surveillance Corridor' : `Active Transect Route (${state})`}
         </Text>
         <Pressable onPress={onPressDetails}>
           <Text className="text-[12px] font-bold text-emerald-600">

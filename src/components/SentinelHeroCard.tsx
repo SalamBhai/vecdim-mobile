@@ -28,7 +28,7 @@ export const SentinelHeroCard: React.FC<SentinelHeroCardProps> = ({ onPressProfi
         <View className="flex-row items-center bg-black/25 px-3 py-1 rounded-full border border-white/10">
           <View className="w-1.5 h-1.5 rounded-full bg-emerald-300 mr-1.5" />
           <Text className="text-[10px] font-bold text-white uppercase tracking-wider">
-            • Live Surveillance • {state}
+            {state === 'National' ? '• Nationwide Surveillance • Osun • Lagos • Kano' : `• Live Surveillance • ${state}`}
           </Text>
         </View>
 
