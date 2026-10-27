@@ -16,7 +16,6 @@ import {
   Flame,
   User,
   Bug,
-  Waves,
   Archive,
   Database,
   CheckCircle2,
@@ -32,7 +31,6 @@ import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
 import { TransectRouteMap } from '../src/components/TransectRouteMap';
 import { SurveysTabScreen } from '../src/components/SurveysTabScreen';
 import { EntomologyModal } from '../src/components/sheets/EntomologyModal';
-import { NtdModal } from '../src/components/sheets/NtdModal';
 import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
 import { Dhis2Modal } from '../src/components/sheets/Dhis2Modal';
@@ -71,7 +69,7 @@ export default function MainAppScreen() {
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
-    'entomology' | 'ntd' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
+    'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
   >(null);
 
   // Load live server records scoped to this authenticated officer
@@ -187,19 +185,19 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             </Text>
           </Pressable>
 
-          {/* Action 2: NTD Host */}
+          {/* Action 2: Early Warning Alerts */}
           <Pressable
-            onPress={() => setActiveModal('ntd')}
+            onPress={() => setActiveModal('alerts')}
             className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
-            <View className="w-10 h-10 rounded-xl bg-cyan-50 items-center justify-center mb-1.5">
-              <Waves size={18} color="#0891B2" />
+            <View className="w-10 h-10 rounded-xl bg-rose-50 items-center justify-center mb-1.5">
+              <Flame size={18} color="#E11D48" />
             </View>
             <Text className="text-[11px] font-bold text-slate-900 leading-tight">
-              NTD Host
+              Alerts
             </Text>
             <Text className="text-[9.5px] text-slate-400 font-medium mt-0.5">
-              Snails
+              EWS Outbreak
             </Text>
           </Pressable>
 
@@ -487,12 +485,6 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
       {/* 3. SLIDE-UP MODALS */}
       <EntomologyModal
         visible={activeModal === 'entomology'}
-        onClose={() => setActiveModal(null)}
-        onRecordSaved={handleRefreshAll}
-      />
-
-      <NtdModal
-        visible={activeModal === 'ntd'}
         onClose={() => setActiveModal(null)}
         onRecordSaved={handleRefreshAll}
       />
