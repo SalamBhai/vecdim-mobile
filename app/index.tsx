@@ -69,7 +69,7 @@ export default function MainAppScreen() {
 // -------------------------------------------------------------
 
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
-  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
+  const { isOnline } = useNetwork();
   const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
@@ -166,10 +166,9 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
               </View>
             </Pressable>
 
-            {/* Network Status Pill (Tap to toggle offline mode simulation) */}
-            <Pressable
-              onPress={toggleSimulatedOffline}
-              className={`flex-row items-center px-2.5 py-1.5 rounded-full mr-2 shadow-xs border active:scale-95 ${
+            {/* Live Network Status Badge */}
+            <View
+              className={`flex-row items-center px-2.5 py-1.5 rounded-full mr-2 shadow-xs border ${
                 isOnline
                   ? 'bg-emerald-50 border-emerald-200'
                   : 'bg-amber-50 border-amber-300'
@@ -181,13 +180,13 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 <CloudOff size={11} color="#B45309" />
               )}
               <Text
-                className={`text-[10px] font-bold font-bricolage ml-1 ${
+                className={`text-[10px] font-bold font-bricolage ml-0.5 ${
                   isOnline ? 'text-emerald-800' : 'text-amber-900'
                 }`}
               >
-                {isOnline ? 'Online' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+                {isOnline ? 'Online' : 'Offline'}
               </Text>
-            </Pressable>
+            </View>
 
             {/* Outbreak Notification Bell */}
             <Pressable

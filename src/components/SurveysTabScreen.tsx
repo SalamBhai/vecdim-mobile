@@ -52,7 +52,7 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
   onOpenQueue,
   onOpenAlerts,
 }) => {
-  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
+  const { isOnline } = useNetwork();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
@@ -122,11 +122,10 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
             </Text>
           </View>
 
-          {/* Action cluster: Network Pill + Refresh + New Survey */}
+          {/* Action cluster: Network Status + Refresh + New Survey */}
           <View className="flex-row items-center space-x-2 gap-2">
-            <Pressable
-              onPress={toggleSimulatedOffline}
-              className={`flex-row items-center px-2 py-1.5 rounded-full border shadow-xs active:scale-95 ${
+            <View
+              className={`flex-row items-center px-2 py-1.5 rounded-full border shadow-xs ${
                 isOnline
                   ? 'bg-emerald-50 border-emerald-200'
                   : 'bg-amber-50 border-amber-300'
@@ -142,9 +141,9 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
                   isOnline ? 'text-emerald-800' : 'text-amber-900'
                 }`}
               >
-                {isOnline ? 'Online' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+                {isOnline ? 'Online' : 'Offline'}
               </Text>
-            </Pressable>
+            </View>
 
             <Pressable
               onPress={onRefresh}

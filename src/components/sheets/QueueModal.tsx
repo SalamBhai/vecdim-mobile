@@ -24,7 +24,7 @@ interface QueueModalProps {
 
 export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, records }) => {
   const { currentUser } = useAuth();
-  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
+  const { isOnline } = useNetwork();
   const queryClient = useQueryClient();
   const [filterMode, setFilterMode] = useState<'mine' | 'all'>('mine');
 
@@ -83,8 +83,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                 <Text className="text-[19px] font-extrabold text-slate-900 font-bricolage mr-2">
                   Offline Local Queue
                 </Text>
-                <Pressable
-                  onPress={toggleSimulatedOffline}
+                <View
                   className={`flex-row items-center px-2 py-0.5 rounded-full border ${
                     isOnline
                       ? 'bg-emerald-50 border-emerald-200'
@@ -101,9 +100,9 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                       isOnline ? 'text-emerald-800' : 'text-amber-900'
                     }`}
                   >
-                    {isOnline ? 'Live' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+                    {isOnline ? 'Live' : 'Offline'}
                   </Text>
-                </Pressable>
+                </View>
               </View>
               <Text className="text-[11.5px] text-slate-400 font-medium mt-0.5">
                 SQLite WAL • Auto-syncs on reconnection
@@ -157,7 +156,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                   Offline queue is empty
                 </Text>
                 <Text className="text-[12px] text-slate-400 mt-1 text-center max-w-[280px]">
-                  Toggle offline mode in the navbar to test offline caching.
+                  All surveys captured in the field are committed immediately to local SQLite WAL storage and synced when connected.
                 </Text>
               </View>
             ) : (
@@ -209,7 +208,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                     if (!isOnline) {
                       Alert.alert(
                         'Device Offline',
-                        'Device is currently offline (or simulated offline). Records are safely saved in SQLite WAL and will automatically sync to PostGIS as soon as connection is restored.'
+                        'Device is currently offline. Records are safely stored in local SQLite WAL and will automatically sync to PostGIS as soon as connection is restored.'
                       );
                       return;
                     }

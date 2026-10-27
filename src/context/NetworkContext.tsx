@@ -7,24 +7,22 @@ import { useAuth } from './AuthContext';
 
 interface NetworkContextType {
   isOnline: boolean;
-  isSimulatedOffline: boolean;
   connectionType: string;
   isSyncing: boolean;
   pendingCount: number;
-  toggleSimulatedOffline: () => void;
   syncPendingRecords: () => Promise<{ success: boolean; syncedCount: number; message: string }>;
   refreshPendingCount: () => Promise<number>;
+  checkConnectivity: () => Promise<boolean>;
 }
 
 const NetworkContext = createContext<NetworkContextType>({
   isOnline: true,
-  isSimulatedOffline: false,
   connectionType: 'wifi',
   isSyncing: false,
   pendingCount: 0,
-  toggleSimulatedOffline: () => {},
   syncPendingRecords: async () => ({ success: false, syncedCount: 0, message: '' }),
   refreshPendingCount: async () => 0,
+  checkConnectivity: async () => true,
 });
 
 // Dynamic check for native NetInfo binary module
@@ -37,11 +35,11 @@ try {
   nativeNetInfo = null;
 }
 
-// Active HTTP probe against local backend & public 204 endpoint
+// Active HTTP probe checking Go backend /health and internet fallback
 async function probeConnectivity(): Promise<boolean> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
     const res = await fetch('http://localhost:8080/health', {
       method: 'GET',
       signal: controller.signal,
@@ -71,12 +69,11 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [hardwareConnected, setHardwareConnected] = useState<boolean>(true);
   const [hardwareReachable, setHardwareReachable] = useState<boolean | null>(true);
   const [connectionType, setConnectionType] = useState<string>('wifi');
-  const [isSimulatedOffline, setIsSimulatedOffline] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [pendingCount, setPendingCount] = useState<number>(0);
 
-  // Computed effective online status
-  const isOnline = !isSimulatedOffline && hardwareConnected && (hardwareReachable ?? true);
+  // Effective real online status
+  const isOnline = hardwareConnected && (hardwareReachable ?? true);
 
   // Track previous online state to trigger auto-sync on reconnection
   const wasOnlineRef = useRef<boolean>(true);
@@ -165,10 +162,17 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [isOnline, currentUser, queryClient, refreshPendingCount]);
 
-  // 3. Hardware & Probe Network Detection
+  // 3. Real Network Detection Engine
+  const checkConnectivity = useCallback(async (): Promise<boolean> => {
+    const reachable = await probeConnectivity();
+    setHardwareConnected(reachable);
+    setHardwareReachable(reachable);
+    setConnectionType(reachable ? 'wifi' : 'none');
+    return reachable;
+  }, []);
+
   useEffect(() => {
     if (nativeNetInfo) {
-      // Native NetInfo module available
       const unsubscribe = nativeNetInfo.addEventListener((state: any) => {
         setHardwareConnected(state.isConnected ?? true);
         setHardwareReachable(state.isInternetReachable);
@@ -185,10 +189,9 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
         unsubscribe();
       };
     } else {
-      // Fallback: active probe via heartbeat + AppState
       let isMounted = true;
 
-      const checkConnectivity = async () => {
+      const runCheck = async () => {
         const reachable = await probeConnectivity();
         if (isMounted) {
           setHardwareConnected(reachable);
@@ -197,18 +200,17 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       };
 
-      // Initial check
-      checkConnectivity();
+      runCheck();
 
-      // Check on AppState change (foregrounding app)
+      // Check on foregrounding
       const appStateSub = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
         if (nextAppState === 'active') {
-          checkConnectivity();
+          runCheck();
         }
       });
 
-      // 6-second heartbeat interval
-      const intervalId = setInterval(checkConnectivity, 6000);
+      // Regular heartbeat check (every 3 seconds for instant detection)
+      const intervalId = setInterval(runCheck, 3000);
 
       return () => {
         isMounted = false;
@@ -218,7 +220,7 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
-  // 4. Auto-Sync on Network Restoration (Offline -> Online transition)
+  // 4. Auto-Sync on Real Network Restoration (Transitions from Offline -> Online)
   useEffect(() => {
     if (!wasOnlineRef.current && isOnline) {
       // Reconnected! Automatically attempt sync if there are pending items
@@ -232,22 +234,16 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
     wasOnlineRef.current = isOnline;
   }, [isOnline, refreshPendingCount, syncPendingRecords]);
 
-  // 5. Toggle Simulated Offline Mode
-  const toggleSimulatedOffline = useCallback(() => {
-    setIsSimulatedOffline((prev) => !prev);
-  }, []);
-
   return (
     <NetworkContext.Provider
       value={{
         isOnline,
-        isSimulatedOffline,
         connectionType,
         isSyncing,
         pendingCount,
-        toggleSimulatedOffline,
         syncPendingRecords,
         refreshPendingCount,
+        checkConnectivity,
       }}
     >
       {children}
