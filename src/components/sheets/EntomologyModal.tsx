@@ -20,6 +20,7 @@ import {
   LocalFieldRecord,
 } from '../../storage/db';
 import { useAuth } from '../../context/AuthContext';
+import { useNetwork } from '../../context/NetworkContext';
 
 const HABITAT_TYPES = [
   'Drainage / Gutter',
@@ -40,6 +41,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   onRecordSaved,
 }) => {
   const { currentUser } = useAuth();
+  const { isOnline } = useNetwork();
 
   const userInitialState = currentUser?.state === 'National' || !currentUser ? 'Osun' : currentUser.state;
   const userInitialLga = currentUser?.primaryLga || 'Osogbo';
@@ -183,8 +185,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
       onRecordSaved();
       onClose();
       Alert.alert(
-        'Record Saved & Assigned',
-        `Survey queued for ${selectedLga} (${whoClass}).\nAssigned to Officer: ${currentUser?.name || 'Officer'} (${currentUser?.badge || 'OS-FO'}). Ready in Outbox.`
+        isOnline ? 'Record Saved & Queued' : 'Record Staged in Offline Outbox',
+        isOnline
+          ? `Survey saved for ${selectedLga} (${whoClass}).\nAssigned to: ${currentUser?.name || 'Officer'} (${currentUser?.badge || 'OS-FO'}). Ready for cloud synchronization.`
+          : `Device is offline. Survey safely committed to local SQLite WAL for ${selectedLga} (${whoClass}). Will auto-sync when network returns.`
       );
     } catch (err: any) {
       setIsSubmitting(false);
@@ -472,17 +476,29 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               onLocationChange={handleLocationChange}
             />
 
-            {/* 6. Action Button: Save to Offline Queue */}
+            {/* 6. Action Button: Save to Queue / Outbox */}
             <Pressable
               onPress={handleSubmit}
               disabled={isSubmitting || gpsData.isBlocked}
               className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md ${
-                gpsData.isBlocked ? 'bg-slate-300' : 'bg-[#D97706] active:bg-[#B45309]'
+                gpsData.isBlocked
+                  ? 'bg-slate-300'
+                  : isOnline
+                  ? 'bg-emerald-600 active:bg-emerald-700'
+                  : 'bg-amber-600 active:bg-amber-700'
               }`}
             >
-              <CloudOff size={16} color="#FFFFFF" />
+              {isOnline ? (
+                <CheckCircle2 size={16} color="#FFFFFF" />
+              ) : (
+                <CloudOff size={16} color="#FFFFFF" />
+              )}
               <Text className="text-white font-bold text-[14px] ml-2 font-bricolage">
-                {isSubmitting ? 'Staging Record...' : 'Save to Offline Queue'}
+                {isSubmitting
+                  ? 'Staging Record...'
+                  : isOnline
+                  ? 'Save & Queue Survey'
+                  : 'Save to Offline Outbox'}
               </Text>
             </Pressable>
           </ScrollView>

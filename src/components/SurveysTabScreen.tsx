@@ -21,11 +21,13 @@ import {
   ChevronRight,
   Database,
   Calendar,
+  CloudOff,
 } from 'lucide-react-native';
 
 import { DemoUser } from '../data/demoUsers';
 import { ServerRecord } from '../api/client';
 import { LocalFieldRecord } from '../storage/db';
+import { useNetwork } from '../context/NetworkContext';
 
 interface SurveysTabScreenProps {
   currentUser: DemoUser;
@@ -50,6 +52,7 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
   onOpenQueue,
   onOpenAlerts,
 }) => {
+  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
@@ -119,8 +122,30 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
             </Text>
           </View>
 
-          {/* Action cluster: Refresh + Queue button */}
+          {/* Action cluster: Network Pill + Refresh + New Survey */}
           <View className="flex-row items-center space-x-2 gap-2">
+            <Pressable
+              onPress={toggleSimulatedOffline}
+              className={`flex-row items-center px-2 py-1.5 rounded-full border shadow-xs active:scale-95 ${
+                isOnline
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-amber-50 border-amber-300'
+              }`}
+            >
+              {isOnline ? (
+                <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+              ) : (
+                <CloudOff size={10} color="#B45309" />
+              )}
+              <Text
+                className={`text-[9.5px] font-bold font-bricolage ml-0.5 ${
+                  isOnline ? 'text-emerald-800' : 'text-amber-900'
+                }`}
+              >
+                {isOnline ? 'Online' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+              </Text>
+            </Pressable>
+
             <Pressable
               onPress={onRefresh}
               disabled={loadingServer}

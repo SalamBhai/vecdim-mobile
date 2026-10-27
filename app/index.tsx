@@ -22,9 +22,11 @@ import {
   Clock,
   Plus,
   RefreshCw,
+  CloudOff,
 } from 'lucide-react-native';
 
 import { useAuth } from '../src/context/AuthContext';
+import { useNetwork } from '../src/context/NetworkContext';
 import { DemoUser } from '../src/data/demoUsers';
 import { LoginScreen } from '../src/screens/LoginScreen';
 import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
@@ -67,6 +69,7 @@ export default function MainAppScreen() {
 // -------------------------------------------------------------
 
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
+  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
   const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
@@ -80,16 +83,23 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   } = useQuery({
     queryKey: ['serverRecords', currentUser.id],
     queryFn: async () => {
-      // National Director has nationwide oversight: fetch all records across Osun, Lagos, Kano
-      if (currentUser.role === 'uniosun' || currentUser.state === 'National') {
-        return await fetchServerRecords(currentUser.id);
+      if (!isOnline) {
+        return { count: 0, records: [] };
       }
-      // State Coordinator fetches all records in their state
-      if (currentUser.role === 'vecdim') {
-        return await fetchServerRecords(currentUser.id, currentUser.state);
+      try {
+        // National Director has nationwide oversight: fetch all records across Osun, Lagos, Kano
+        if (currentUser.role === 'uniosun' || currentUser.state === 'National') {
+          return await fetchServerRecords(currentUser.id);
+        }
+        // State Coordinator fetches all records in their state
+        if (currentUser.role === 'vecdim') {
+          return await fetchServerRecords(currentUser.id, currentUser.state);
+        }
+        // Field officer fetches their records scoped to their jurisdiction
+        return await fetchServerRecords(currentUser.id, currentUser.state, currentUser.primaryLga);
+      } catch {
+        return { count: 0, records: [] };
       }
-      // Field officer fetches their records scoped to their jurisdiction
-      return await fetchServerRecords(currentUser.id, currentUser.state, currentUser.primaryLga);
     },
     enabled: !!currentUser.id,
   });
@@ -106,7 +116,9 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
 
   const handleRefreshAll = () => {
     refetchLocal();
-    refetchServer();
+    if (isOnline) {
+      refetchServer();
+    }
   };
 
   const pendingLocalRecords = localRecords.filter((r) => r.sync_status === 'pending_sync');
@@ -152,6 +164,29 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                   {currentUser.state === 'National' ? 'Nationwide vector surveillance grid active' : `${currentUser.state} vector surveillance grid active`}
                 </Text>
               </View>
+            </Pressable>
+
+            {/* Network Status Pill (Tap to toggle offline mode simulation) */}
+            <Pressable
+              onPress={toggleSimulatedOffline}
+              className={`flex-row items-center px-2.5 py-1.5 rounded-full mr-2 shadow-xs border active:scale-95 ${
+                isOnline
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-amber-50 border-amber-300'
+              }`}
+            >
+              {isOnline ? (
+                <View className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5" />
+              ) : (
+                <CloudOff size={11} color="#B45309" />
+              )}
+              <Text
+                className={`text-[10px] font-bold font-bricolage ml-1 ${
+                  isOnline ? 'text-emerald-800' : 'text-amber-900'
+                }`}
+              >
+                {isOnline ? 'Online' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+              </Text>
             </Pressable>
 
             {/* Outbreak Notification Bell */}

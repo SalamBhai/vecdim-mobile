@@ -8,11 +8,12 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { X, CheckCircle2, RefreshCw, UserCheck, Shield } from 'lucide-react-native';
+import { X, CheckCircle2, RefreshCw, UserCheck, Shield, CloudOff } from 'lucide-react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { LocalFieldRecord, updateRecordSyncStatus } from '../../storage/db';
 import { submitBatchRecords, BatchSyncResponse } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import { useNetwork } from '../../context/NetworkContext';
 import { getDemoUserById } from '../../data/demoUsers';
 
 interface QueueModalProps {
@@ -23,6 +24,7 @@ interface QueueModalProps {
 
 export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, records }) => {
   const { currentUser } = useAuth();
+  const { isOnline, isSimulatedOffline, toggleSimulatedOffline } = useNetwork();
   const queryClient = useQueryClient();
   const [filterMode, setFilterMode] = useState<'mine' | 'all'>('mine');
 
@@ -73,15 +75,38 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View className="flex-1 bg-black/60 justify-end">
-        <View className="bg-white rounded-t-[32px] p-5 max-h-[85%] shadow-2xl">
+        <View className="bg-white rounded-t-[32px] p-5 h-[85%] shadow-2xl flex-col">
           {/* Header */}
-          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
+          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100 shrink-0">
             <View>
-              <Text className="text-[19px] font-extrabold text-slate-900 font-bricolage">
-                Offline Local Queue
-              </Text>
+              <View className="flex-row items-center">
+                <Text className="text-[19px] font-extrabold text-slate-900 font-bricolage mr-2">
+                  Offline Local Queue
+                </Text>
+                <Pressable
+                  onPress={toggleSimulatedOffline}
+                  className={`flex-row items-center px-2 py-0.5 rounded-full border ${
+                    isOnline
+                      ? 'bg-emerald-50 border-emerald-200'
+                      : 'bg-amber-50 border-amber-300'
+                  }`}
+                >
+                  {isOnline ? (
+                    <View className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+                  ) : (
+                    <CloudOff size={10} color="#B45309" />
+                  )}
+                  <Text
+                    className={`text-[9.5px] font-bold font-bricolage ${
+                      isOnline ? 'text-emerald-800' : 'text-amber-900'
+                    }`}
+                  >
+                    {isOnline ? 'Live' : isSimulatedOffline ? 'Offline (Sim)' : 'Offline'}
+                  </Text>
+                </Pressable>
+              </View>
               <Text className="text-[11.5px] text-slate-400 font-medium mt-0.5">
-                Persistent Device Cache
+                SQLite WAL • Auto-syncs on reconnection
               </Text>
             </View>
             <Pressable
@@ -180,21 +205,38 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                 })}
 
                 <Pressable
-                  onPress={() => syncMutation.mutate(displayRecords)}
+                  onPress={() => {
+                    if (!isOnline) {
+                      Alert.alert(
+                        'Device Offline',
+                        'Device is currently offline (or simulated offline). Records are safely saved in SQLite WAL and will automatically sync to PostGIS as soon as connection is restored.'
+                      );
+                      return;
+                    }
+                    syncMutation.mutate(displayRecords);
+                  }}
                   disabled={syncMutation.isPending}
-                  className="py-3.5 rounded-2xl bg-emerald-600 active:bg-emerald-700 items-center justify-center flex-row shadow-md mt-2"
+                  className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mt-2 ${
+                    !isOnline
+                      ? 'bg-amber-600 active:bg-amber-700'
+                      : 'bg-emerald-600 active:bg-emerald-700'
+                  }`}
                 >
                   {syncMutation.isPending ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : !isOnline ? (
+                    <CloudOff size={16} color="#FFFFFF" />
                   ) : (
                     <RefreshCw size={16} color="#FFFFFF" />
                   )}
-                  <Text className="text-white font-bold text-[13px] ml-2">
+                  <Text className="text-white font-bold text-[13px] ml-2 font-bricolage">
                     {syncMutation.isPending
                       ? 'Synchronizing Batch...'
+                      : !isOnline
+                      ? `Offline (${displayRecords.length} Staged — Auto-Syncs on Connect)`
                       : `Sync ${displayRecords.length} Record${
                           displayRecords.length === 1 ? '' : 's'
-                        } as ${currentUser?.firstName || 'Officer'}`}
+                        } to PostGIS`}
                   </Text>
                 </Pressable>
               </View>

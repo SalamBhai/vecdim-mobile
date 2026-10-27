@@ -10,6 +10,7 @@ import {
   BricolageGrotesque_800ExtraBold,
 } from '@expo-google-fonts/bricolage-grotesque';
 import { AuthProvider } from '../src/context/AuthContext';
+import { NetworkProvider } from '../src/context/NetworkContext';
 import '../src/global.css';
 
 SplashScreen.preventAutoHideAsync();
@@ -58,7 +59,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <NetworkProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </NetworkProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
