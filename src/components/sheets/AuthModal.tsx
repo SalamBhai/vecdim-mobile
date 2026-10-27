@@ -50,12 +50,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View className="flex-1 bg-black/60 justify-end">
-        <View className="bg-[#18181B] rounded-t-[32px] pt-3 pb-8 px-5 max-h-[85%] shadow-2xl">
+        <View className="bg-[#18181B] rounded-t-[32px] pt-3 pb-8 px-5 h-[85%] flex-col shadow-2xl">
           {/* Top Pill Drag Handle (Meta Image 4 Style) */}
           <View className="w-10 h-1 bg-zinc-600 rounded-full mx-auto mb-4" />
 
           {/* Clean Header Row */}
-          <View className="flex-row items-center justify-between pb-3 border-b border-zinc-800 mb-2">
+          <View className="flex-row items-center justify-between pb-3 border-b border-zinc-800 mb-2 shrink-0">
             <Text className="text-[16px] font-bold text-white tracking-tight">
               Switch Account
             </Text>
@@ -67,7 +67,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 4 }}>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={true}
+            bounces={true}
+            contentContainerStyle={{ paddingVertical: 4 }}
+          >
             {/* Field Officer Accounts (Primary List) */}
             <View className="space-y-1 mb-4">
               {fieldAccounts.map((account) => {

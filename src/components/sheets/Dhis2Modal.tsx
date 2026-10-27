@@ -43,15 +43,15 @@ export const Dhis2Modal: React.FC<Dhis2ModalProps> = ({ visible, onClose }) => {
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View className="flex-1 bg-black/60 justify-end">
-        <View className="bg-white rounded-t-[32px] p-5 max-h-[85%] shadow-2xl">
+        <View className="bg-white rounded-t-[32px] p-5 h-[85%] flex-col shadow-2xl">
           {/* Header */}
-          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100">
+          <View className="flex-row items-center justify-between pb-3 border-b border-slate-100 shrink-0">
             <View className="flex-row items-center">
               <View className="p-1.5 bg-slate-900 rounded-lg mr-2">
                 <Database size={16} color="#FFFFFF" />
               </View>
               <View>
-                <Text className="text-[17px] font-extrabold text-slate-900">
+                <Text className="text-[17px] font-extrabold text-slate-900 font-bricolage">
                   DHIS2 Web API Payload
                 </Text>
                 <Text className="text-[11px] text-slate-500">
@@ -67,7 +67,7 @@ export const Dhis2Modal: React.FC<Dhis2ModalProps> = ({ visible, onClose }) => {
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 15 }}>
+          <ScrollView className="flex-1" showsVerticalScrollIndicator={true} bounces={true} contentContainerStyle={{ paddingVertical: 15 }}>
             <View className="bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-inner">
               <Text className="text-[11px] font-mono text-emerald-400">
                 {JSON.stringify(samplePayload, null, 2)}
