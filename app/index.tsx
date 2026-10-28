@@ -352,15 +352,17 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                   </View>
                 </View>
 
-                <View className="items-end shrink-0">
-                  <View className="px-2 py-0.5 rounded-full bg-amber-200 border border-amber-300 mb-1">
+                <View className="items-end justify-center shrink-0">
+                  <View className={`px-2 py-0.5 rounded-full bg-amber-200 border border-amber-300 ${!isPending ? 'mb-1' : ''}`}>
                     <Text className="text-[8.5px] font-black text-amber-900 uppercase">
                       Pending Sync
                     </Text>
                   </View>
-                  <Text className="text-[10px] font-medium text-amber-800">
-                    {isPending ? 'Bioassay Pending' : `${item.mortality_pct}% mort.`}
-                  </Text>
+                  {!isPending && (
+                    <Text className="text-[10px] font-medium text-amber-800">
+                      {item.mortality_pct}% mort.
+                    </Text>
+                  )}
                 </View>
               </Pressable>
             );

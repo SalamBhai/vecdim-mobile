@@ -186,7 +186,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                       <Text className="text-[11px] text-slate-600 mb-1">
                         {item.ward} •{' '}
                         {item.who_class?.toLowerCase().includes('pending')
-                          ? `${item.larval_density ? `${item.larval_density} larvae/dip` : 'Larval Survey'} • Bioassay Pending (Lab)`
+                          ? `${item.species} • ${item.larval_density ? `${item.larval_density} larvae/dip` : 'Larval Survey'}`
                           : `${item.species} • Mortality: ${item.mortality_pct}% (${item.who_class})`}
                       </Text>
                       <View className="flex-row items-center justify-between">
