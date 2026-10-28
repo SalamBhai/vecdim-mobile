@@ -81,7 +81,6 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
   // Active form section tab: 1. Larval (Field) vs 2. Bioassay (Lab)
   const [activeTab, setActiveTab] = useState<'larval' | 'bioassay'>('larval');
-  const [bioassayStatus, setBioassayStatus] = useState<'completed' | 'pending'>('completed');
 
   const [selectedState, setSelectedState] = useState<string>(userInitialState);
   const [selectedLga, setSelectedLga] = useState<string>(userInitialLga);
@@ -672,65 +671,24 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               nestedScrollEnabled={true}
               bounces={true}
             >
-              {/* Sample Linkage & Workflow Status Card */}
+              {/* Sample Linkage Card */}
               <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
-                <View className="flex-row items-center justify-between mb-2 pb-2 border-b border-slate-200">
+                <View className="flex-row items-center justify-between">
                   <View>
                     <Text className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
                       LINKED FIELD SAMPLE
                     </Text>
-                    <Text className="text-[13px] font-mono font-black text-slate-900">
+                    <Text className="text-[13px] font-mono font-black text-slate-900 mt-0.5">
                       {bottleLabelId}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase">
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider font-bricolage">
                       SITE
                     </Text>
-                    <Text className="text-[11px] font-bold text-slate-700">
+                    <Text className="text-[11px] font-bold text-slate-700 mt-0.5">
                       {selectedLga} • {ward.split(' ')[0] || 'Ward'}
                     </Text>
-                  </View>
-                </View>
-
-                {/* Status Toggle: Completed vs Pending 24h Readout */}
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-[11px] font-bold text-slate-700 font-bricolage">
-                    Bioassay Status:
-                  </Text>
-                  <View className="flex-row space-x-1.5">
-                    <Pressable
-                      onPress={() => setBioassayStatus('completed')}
-                      className={`px-2.5 py-1 rounded-lg border ${
-                        bioassayStatus === 'completed'
-                          ? 'bg-emerald-600 border-emerald-600'
-                          : 'bg-white border-slate-200'
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-bold ${
-                          bioassayStatus === 'completed' ? 'text-white' : 'text-slate-600'
-                        }`}
-                      >
-                        Readout Complete
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => setBioassayStatus('pending')}
-                      className={`px-2.5 py-1 rounded-lg border ${
-                        bioassayStatus === 'pending'
-                          ? 'bg-amber-600 border-amber-600'
-                          : 'bg-white border-slate-200'
-                      }`}
-                    >
-                      <Text
-                        className={`text-[10px] font-bold ${
-                          bioassayStatus === 'pending' ? 'text-white' : 'text-slate-600'
-                        }`}
-                      >
-                        24h Pending
-                      </Text>
-                    </Pressable>
                   </View>
                 </View>
               </View>
@@ -878,7 +836,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               {/* Action Buttons: Save Complete Survey OR Back */}
               <View className="mt-4 mb-2">
                 <Pressable
-                  onPress={() => handleSubmit(bioassayStatus === 'completed')}
+                  onPress={() => handleSubmit(true)}
                   disabled={isSubmitting || gpsData.isBlocked}
                   className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mb-3 ${
                     gpsData.isBlocked
