@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,7 +32,7 @@ import { LoginScreen } from '../src/screens/LoginScreen';
 import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
 import { TransectRouteMap } from '../src/components/TransectRouteMap';
 import { SurveysTabScreen } from '../src/components/SurveysTabScreen';
-import { EntomologyModal } from '../src/components/sheets/EntomologyModal';
+import { EntomologyModal, RecordSavedInfo } from '../src/components/sheets/EntomologyModal';
 import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
 import { Dhis2Modal } from '../src/components/sheets/Dhis2Modal';
@@ -74,6 +74,38 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
   >(null);
+
+  // Non-blocking auto-dismissing toast notification
+  const [toastMessage, setToastMessage] = useState<{
+    title: string;
+    subtitle?: string;
+    type: 'success' | 'offline';
+  } | null>(null);
+
+  const handleRecordSaved = (info?: RecordSavedInfo) => {
+    handleRefreshAll();
+    if (info) {
+      setToastMessage({
+        title: info.isOnline ? 'Survey Saved & Queued' : 'Saved to Offline Outbox',
+        subtitle: `${info.lga} • ${info.bottleLabelId}`,
+        type: info.isOnline ? 'success' : 'offline',
+      });
+    } else {
+      setToastMessage({
+        title: 'Survey Saved',
+        type: 'success',
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 2800);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Load live server records scoped to this authenticated officer
   const {
@@ -520,7 +552,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
       <EntomologyModal
         visible={activeModal === 'entomology'}
         onClose={() => setActiveModal(null)}
-        onRecordSaved={handleRefreshAll}
+        onRecordSaved={handleRecordSaved}
       />
 
       <QueueModal
@@ -545,6 +577,36 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         records={localRecords}
         onUserChanged={handleRefreshAll}
       />
+
+      {/* 4. SLEEK NON-BLOCKING FLOATING TOAST PILL */}
+      {toastMessage && (
+        <View
+          pointerEvents="none"
+          className="absolute top-14 left-0 right-0 z-50 items-center px-4"
+        >
+          <View
+            className={`flex-row items-center px-4 py-2 rounded-full shadow-lg border ${
+              toastMessage.type === 'success'
+                ? 'bg-slate-950/95 border-emerald-500/50'
+                : 'bg-slate-950/95 border-amber-500/50'
+            }`}
+          >
+            <View
+              className={`w-2 h-2 rounded-full mr-2 ${
+                toastMessage.type === 'success' ? 'bg-emerald-400' : 'bg-amber-400'
+              }`}
+            />
+            <Text className="text-white text-[12px] font-bold font-bricolage">
+              {toastMessage.title}
+            </Text>
+            {toastMessage.subtitle && (
+              <Text className="text-slate-300 text-[11px] font-mono ml-2 pl-2 border-l border-slate-700">
+                {toastMessage.subtitle}
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 }

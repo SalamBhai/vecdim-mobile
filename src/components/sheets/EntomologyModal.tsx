@@ -53,10 +53,17 @@ const INSECTICIDE_TYPES = [
   'Pirimiphos-methyl',
 ];
 
+export interface RecordSavedInfo {
+  bottleLabelId: string;
+  isOnline: boolean;
+  whoClass: string;
+  lga: string;
+}
+
 interface EntomologyModalProps {
   visible: boolean;
   onClose: () => void;
-  onRecordSaved: () => void;
+  onRecordSaved: (info?: RecordSavedInfo) => void;
 }
 
 export const EntomologyModal: React.FC<EntomologyModalProps> = ({
@@ -244,15 +251,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
       await saveFieldRecord(record);
       await clearFormDraft(currentUser?.id);
       setIsSubmitting(false);
-      onRecordSaved();
+      onRecordSaved({
+        bottleLabelId,
+        isOnline,
+        whoClass,
+        lga: selectedLga,
+      });
       onClose();
-
-      const successTitle = isOnline ? 'Survey Saved & Queued' : 'Saved to Offline Outbox';
-      const successBody = isOnline
-        ? `Survey saved for ${selectedLga} (${bottleLabelId} • ${whoClass}). Ready for cloud sync.`
-        : `Device is offline. Survey safely committed to local SQLite WAL (${bottleLabelId}). Will auto-sync on reconnect.`;
-
-      Alert.alert(successTitle, successBody);
     } catch (err: any) {
       setIsSubmitting(false);
       Alert.alert('Storage Error', err.message);
