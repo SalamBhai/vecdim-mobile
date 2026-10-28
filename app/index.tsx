@@ -270,15 +270,8 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {/* Action 3: Offline Queue */}
           <Pressable
             onPress={() => setActiveModal('queue')}
-            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs relative active:bg-slate-50"
+            className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
-            {pendingLocalRecords.length > 0 && (
-              <View className="absolute -top-1 -right-1 bg-amber-600 rounded-full w-4.5 h-4.5 items-center justify-center shadow-xs">
-                <Text className="text-white text-[9px] font-black">
-                  {pendingLocalRecords.length}
-                </Text>
-              </View>
-            )}
             <View className="w-10 h-10 rounded-xl bg-amber-50 items-center justify-center mb-1.5">
               <Archive size={18} color="#D97706" />
             </View>
