@@ -70,7 +70,7 @@ export default function MainAppScreen() {
 // -------------------------------------------------------------
 
 function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
-  const { isOnline, toggleOffline } = useNetwork();
+  const { isOnline, isSyncing, toggleOffline, syncPendingRecords } = useNetwork();
   const [activeTab, setActiveTab] = useState<'home' | 'surveys'>('home');
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
@@ -98,18 +98,34 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
     type: 'success' | 'offline';
   } | null>(null);
 
-  const handleRecordSaved = (info?: RecordSavedInfo) => {
+  const handleRecordSaved = async (info?: RecordSavedInfo) => {
     handleRefreshAll();
-    if (info) {
+    if (isOnline) {
       setToastMessage({
-        title: info.isOnline ? 'Survey Saved & Queued' : 'Saved to Offline Outbox',
-        subtitle: `${info.lga} • ${info.bottleLabelId}`,
-        type: info.isOnline ? 'success' : 'offline',
+        title: 'Saving & Syncing...',
+        subtitle: `${info?.lga || ''} • Uploading to national cloud`,
+        type: 'success',
       });
+      try {
+        await syncPendingRecords();
+        handleRefreshAll();
+        setToastMessage({
+          title: 'Survey Synced & Verified',
+          subtitle: `${info?.lga || ''} • ${info?.bottleLabelId || 'Transmitted to server'}`,
+          type: 'success',
+        });
+      } catch {
+        setToastMessage({
+          title: 'Saved to Outbox',
+          subtitle: `${info?.lga || ''} • Will retry automatically`,
+          type: 'offline',
+        });
+      }
     } else {
       setToastMessage({
-        title: 'Survey Saved',
-        type: 'success',
+        title: 'Saved to Offline Outbox',
+        subtitle: `${info?.lga || ''} • ${info?.bottleLabelId || ''}`,
+        type: 'offline',
       });
     }
   };
@@ -171,6 +187,13 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
 
   const pendingLocalRecords = localRecords.filter((r) => r.sync_status === 'pending_sync');
   const serverRecords: ServerRecord[] = serverData?.records || [];
+
+  // Automatically flush outbox whenever the device is online and pending items exist
+  useEffect(() => {
+    if (isOnline && pendingLocalRecords.length > 0 && !isSyncing) {
+      syncPendingRecords().catch(console.error);
+    }
+  }, [isOnline, pendingLocalRecords.length, isSyncing, syncPendingRecords]);
 
   return (
     <View className="flex-1 bg-[#F8FAFC]">
