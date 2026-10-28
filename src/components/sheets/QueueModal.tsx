@@ -179,7 +179,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                             </Text>
                           </View>
                           <Text className="text-[12px] font-bold text-slate-900">
-                            MALARIA: {item.state} • {item.lga}
+                            {item.state} • {item.lga}
                           </Text>
                         </View>
                         <Text className="text-[10px] text-slate-400 font-mono">
@@ -187,15 +187,18 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                         </Text>
                       </View>
                       <Text className="text-[11px] text-slate-600 mb-1">
-                        {item.ward} • {item.species} • Mortality: {item.mortality_pct}% ({item.who_class})
+                        {item.ward} •{' '}
+                        {item.who_class?.toLowerCase().includes('pending')
+                          ? `${item.larval_density ? `${item.larval_density} larvae/dip` : 'Larval Survey'} • Bioassay Pending (Lab)`
+                          : `${item.species} • Mortality: ${item.mortality_pct}% (${item.who_class})`}
                       </Text>
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-[9.5px] text-slate-400">
-                          Captured by: {recordUser.name} ({item.user_id || 'u_field_03'})
+                        <Text className="text-[9.5px] text-slate-500 font-medium">
+                          Officer: {recordUser.name}
                         </Text>
-                        <View className="px-1.5 py-0.5 rounded bg-amber-100">
+                        <View className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-200">
                           <Text className="text-[9px] font-bold text-amber-800">
-                            Staged Locally
+                            Pending Upload
                           </Text>
                         </View>
                       </View>
@@ -208,7 +211,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                     if (!isOnline) {
                       Alert.alert(
                         'Device Offline',
-                        'Device is currently offline. Records are safely stored in local SQLite WAL and will automatically sync to PostGIS as soon as connection is restored.'
+                        'Device is currently offline. Records are safely stored in local SQLite storage and will automatically upload as soon as your connection is restored.'
                       );
                       return;
                     }
@@ -228,14 +231,14 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                   ) : (
                     <RefreshCw size={16} color="#FFFFFF" />
                   )}
-                  <Text className="text-white font-bold text-[13px] ml-2 font-bricolage">
+                  <Text className="text-white font-bold text-[13.5px] ml-2 font-bricolage">
                     {syncMutation.isPending
-                      ? 'Synchronizing Batch...'
+                      ? 'Uploading Records...'
                       : !isOnline
                       ? `Offline (${displayRecords.length} Staged — Auto-Syncs on Connect)`
                       : `Sync ${displayRecords.length} Record${
                           displayRecords.length === 1 ? '' : 's'
-                        } to PostGIS`}
+                        } to Cloud`}
                   </Text>
                 </Pressable>
               </View>
