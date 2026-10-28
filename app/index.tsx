@@ -336,45 +336,32 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
               <Pressable
                 key={`local-${item.id}`}
                 onPress={() => setActiveModal('queue')}
-                className="bg-amber-50/70 p-3 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-amber-100/60"
+                className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-amber-100/60"
               >
-                <View className="flex-row items-center flex-1 mr-2">
-                  <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3 shadow-xs">
+                <View className="flex-row items-center flex-1 mr-3">
+                  <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3 shrink-0 shadow-xs">
                     <Clock size={18} color="#D97706" />
                   </View>
                   <View className="flex-1">
-                    <View className="flex-row items-center">
-                      <Text className="font-bold text-[13px] text-slate-900 leading-tight mr-1.5">
-                        {item.lga} • {item.ward}
-                      </Text>
-                      <View className="px-1.5 py-0.5 rounded-full bg-amber-200">
-                        <Text className="text-[8.5px] font-black text-amber-900 uppercase">
-                          Pending Sync
-                        </Text>
-                      </View>
-                    </View>
-                    <Text className="text-[10.5px] text-slate-500 mt-1">
+                    <Text className="font-bold text-[13px] text-slate-900 leading-tight" numberOfLines={1}>
+                      {item.lga} • {item.ward}
+                    </Text>
+                    <Text className="text-[11px] text-slate-500 mt-0.5" numberOfLines={1}>
                       {item.species} • {item.larval_density ?? '0.0'} /dip
                     </Text>
                   </View>
                 </View>
 
-                {isPending ? (
-                  <View className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300">
-                    <Text className="text-[9px] font-bold text-amber-800">
-                      Bioassay Pending
+                <View className="items-end shrink-0">
+                  <View className="px-2 py-0.5 rounded-full bg-amber-200 border border-amber-300 mb-1">
+                    <Text className="text-[8.5px] font-black text-amber-900 uppercase">
+                      Pending Sync
                     </Text>
                   </View>
-                ) : (
-                  <View className="items-end">
-                    <Text className="text-[13px] font-extrabold text-amber-900">
-                      {item.mortality_pct}% <Text className="text-[10px] text-slate-400 font-normal">mort.</Text>
-                    </Text>
-                    <Text className="text-[9px] font-bold text-amber-800">
-                      {item.who_class}
-                    </Text>
-                  </View>
-                )}
+                  <Text className="text-[10px] font-medium text-amber-800">
+                    {isPending ? 'Bioassay Pending' : `${item.mortality_pct}% mort.`}
+                  </Text>
+                </View>
               </Pressable>
             );
           })}
@@ -384,41 +371,30 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             <Pressable
               key={`server-${item.id}`}
               onPress={() => setActiveModal('entomology')}
-              className="bg-white p-3 rounded-2xl border border-slate-100 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-slate-50"
+              className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-slate-50"
             >
-              <View className="flex-row items-center flex-1 mr-2">
-                <View className="w-10 h-10 rounded-full bg-emerald-100 items-center justify-center mr-3 shadow-xs">
+              <View className="flex-row items-center flex-1 mr-3">
+                <View className="w-10 h-10 rounded-full bg-emerald-100 items-center justify-center mr-3 shrink-0 shadow-xs">
                   <Text className="text-base">🦟</Text>
                 </View>
                 <View className="flex-1">
-                  <View className="flex-row items-center">
-                    <Text className="font-bold text-[13px] text-slate-900 leading-tight mr-1.5">
-                      {item.lga} • {item.ward}
-                    </Text>
-                    <View className="px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
-                      <Text className="text-[8.5px] font-bold text-emerald-800">
-                        Synced
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center mt-1">
-                    <Text className="text-[10px] text-slate-400 mr-2">
-                      {item.collection_date} • {item.species}
-                    </Text>
-                    <View className="px-2 py-0.5 rounded-full bg-slate-100">
-                      <Text className="text-[9px] font-bold text-slate-700">
-                        {item.who_class}
-                      </Text>
-                    </View>
-                  </View>
+                  <Text className="font-bold text-[13px] text-slate-900 leading-tight" numberOfLines={1}>
+                    {item.lga} • {item.ward}
+                  </Text>
+                  <Text className="text-[11px] text-slate-400 mt-0.5" numberOfLines={1}>
+                    {item.collection_date} • {item.species}
+                  </Text>
                 </View>
               </View>
-              <View className="items-end">
-                <Text className="text-[13px] font-extrabold text-slate-900">
-                  {item.mortality_pct}% <Text className="text-[10px] text-slate-400 font-normal">mort.</Text>
-                </Text>
-                <Text className="text-[10px] text-slate-400 font-mono">
-                  {item.larval_density} /dip
+
+              <View className="items-end shrink-0">
+                <View className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 mb-1">
+                  <Text className="text-[8.5px] font-bold text-emerald-800 uppercase">
+                    Synced
+                  </Text>
+                </View>
+                <Text className="text-[10.5px] font-bold text-slate-900">
+                  {item.mortality_pct}% <Text className="text-[9.5px] font-normal text-slate-400">mort.</Text>
                 </Text>
               </View>
             </Pressable>
