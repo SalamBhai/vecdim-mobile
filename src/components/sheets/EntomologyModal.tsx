@@ -87,12 +87,12 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   const [selectedState, setSelectedState] = useState<string>(userInitialState);
   const [selectedLga, setSelectedLga] = useState<string>(userInitialLga);
   const [showLgaPicker, setShowLgaPicker] = useState<boolean>(false);
-  const [ward, setWard] = useState<string>('Ward 04 (Oja-Oba)');
+  const [ward, setWard] = useState<string>('');
   const [habitatType, setHabitatType] = useState<string>(HABITAT_TYPES[0]);
   const [dipsCount, setDipsCount] = useState<number>(10);
-  const [totalLarvae, setTotalLarvae] = useState<number>(180);
+  const [totalLarvae, setTotalLarvae] = useState<number>(0);
   const [nExposed, setNExposed] = useState<number>(100);
-  const [nDead, setNDead] = useState<number>(84);
+  const [nDead, setNDead] = useState<number>(0);
   const [species, setSpecies] = useState<string>(VECTOR_SPECIES[0]);
   const [insecticide, setInsecticide] = useState<string>(INSECTICIDE_TYPES[0]);
 
@@ -144,13 +144,26 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
     densityDotColor = 'bg-amber-500';
   }
 
-  // Synchronize state/LGA defaults when currentUser changes or modal opens
+  // Reset form and synchronize state/LGA defaults whenever modal opens anew
   useEffect(() => {
     if (visible) {
+      setActiveTab('larval');
+      setIsLarvalLocked(false);
+      setShowLgaPicker(false);
+
       const isNational = currentUser?.role === 'uniosun' || currentUser?.state === 'National';
       const assigned = isNational ? 'Osun' : (currentUser?.state || 'Osun');
       setSelectedState(assigned);
       setSelectedLga(currentUser?.primaryLga && !currentUser.primaryLga.includes('HQ') ? currentUser.primaryLga : (getLGAsForState(assigned)[0] || 'Osogbo'));
+      setWard('');
+      setHabitatType(HABITAT_TYPES[0]);
+      setDipsCount(10);
+      setTotalLarvae(0);
+      setNExposed(100);
+      setNDead(0);
+      setSpecies(VECTOR_SPECIES[0]);
+      setInsecticide(INSECTICIDE_TYPES[0]);
+
       setGpsData({
         latitude: currentUser?.defaultLat || 7.7827,
         longitude: currentUser?.defaultLon || 4.5418,
@@ -158,51 +171,34 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         isBlocked: false,
         proximityResult: null,
       });
-
-      // Load draft strictly scoped to this authenticated user
-      (async () => {
-        const draft = await getFormDraft(currentUser?.id);
-        if (draft && draft.formData) {
-          const d = draft.formData;
-          if (isNational && d.selectedState) {
-            setSelectedState(d.selectedState);
-          }
-          if (d.selectedLga) setSelectedLga(d.selectedLga);
-          if (d.ward) setWard(d.ward);
-          if (d.habitatType) setHabitatType(d.habitatType);
-          if (d.dipsCount) setDipsCount(d.dipsCount);
-          if (d.totalLarvae) setTotalLarvae(d.totalLarvae);
-          if (d.nExposed) setNExposed(d.nExposed);
-          if (d.nDead) setNDead(d.nDead);
-          if (d.species) setSpecies(d.species);
-          if (d.insecticide) setInsecticide(d.insecticide);
-        }
-      })();
     }
   }, [visible, currentUser]);
 
-  // Debounced autosave strictly scoped to this officer
+  // Debounced autosave strictly scoped to this officer (only if form has active content)
   useEffect(() => {
+    if (!visible) return;
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(async () => {
-      await saveFormDraft({
-        selectedState,
-        selectedLga,
-        ward,
-        habitatType,
-        dipsCount,
-        totalLarvae,
-        nExposed,
-        nDead,
-        species,
-        insecticide,
-      }, currentUser?.id);
+      if (ward.trim().length > 0 || totalLarvae > 0) {
+        await saveFormDraft({
+          selectedState,
+          selectedLga,
+          ward,
+          habitatType,
+          dipsCount,
+          totalLarvae,
+          nExposed,
+          nDead,
+          species,
+          insecticide,
+        }, currentUser?.id);
+      }
     }, 1500);
 
     return () => {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
-  }, [selectedState, selectedLga, ward, habitatType, dipsCount, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
+  }, [visible, selectedState, selectedLga, ward, habitatType, dipsCount, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
 
   const handleLocationChange = useCallback((data: GPSLocationData) => {
     setGpsData(data);
