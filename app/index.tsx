@@ -419,7 +419,9 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                   </Text>
                 </View>
                 <Text className="text-[10.5px] font-bold text-slate-900">
-                  {item.mortality_pct}% <Text className="text-[9.5px] font-normal text-slate-400">mort.</Text>
+                  {!item.n_exposed || item.n_exposed === 0 || item.who_class?.toLowerCase().includes('pending')
+                    ? 'Bioassay Pending'
+                    : `${item.mortality_pct}% mort.`}
                 </Text>
               </View>
             </Pressable>

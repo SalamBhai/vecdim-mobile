@@ -41,7 +41,10 @@ export const SurveyDetailModal: React.FC<SurveyDetailModalProps> = ({
   if (!record) return null;
 
   const isLocal = record.source === 'local' || record.sync_status === 'pending_sync';
-  const isBioassayPending = record.who_class?.toLowerCase().includes('pending');
+  const isBioassayPending =
+    !record.n_exposed ||
+    record.n_exposed === 0 ||
+    record.who_class?.toLowerCase().includes('pending');
   const mortality = record.mortality_pct ?? 0;
 
   let resistanceColor = 'text-rose-600';
@@ -128,17 +131,19 @@ export const SurveyDetailModal: React.FC<SurveyDetailModalProps> = ({
             <View className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200 mb-3.5 shadow-xs">
               <View className="flex-row items-center justify-between mb-2.5">
                 <Text className="text-[11px] font-bold uppercase text-slate-500 tracking-wider font-bricolage">
-                  WHO BIOASSAY RESULTS
+                  {isBioassayPending ? 'WHO BIOASSAY STATUS' : 'WHO BIOASSAY RESULTS'}
                 </Text>
                 <View className={`px-2 py-0.5 rounded-md border ${resistanceBadgeBg}`}>
                   <Text className={`text-[10px] font-bold ${resistanceBadgeText}`}>
-                    {record.who_class || (isBioassayPending ? 'Bioassay Pending' : 'Susceptible')}
+                    {isBioassayPending ? 'Bioassay Pending' : (record.who_class || 'Susceptible')}
                   </Text>
                 </View>
               </View>
 
               <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                <Text className="text-[12px] text-slate-600">Insecticide Formulation</Text>
+                <Text className="text-[12px] text-slate-600">
+                  {isBioassayPending ? 'Planned Test Formulation' : 'Insecticide Formulation'}
+                </Text>
                 <Text className="text-[12.5px] font-bold text-slate-900">
                   {record.insecticide || 'Permethrin'}
                 </Text>
@@ -150,15 +155,15 @@ export const SurveyDetailModal: React.FC<SurveyDetailModalProps> = ({
                 </Text>
               </View>
               <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
-                <Text className="text-[12px] text-slate-600">Mosquitoes Exposed</Text>
+                <Text className="text-[12px] text-slate-600">Mosquitoes Exposed (Tube)</Text>
                 <Text className="text-[12.5px] font-mono font-bold text-slate-900">
-                  {record.n_exposed ?? 0}
+                  {isBioassayPending ? 'Awaiting Adults' : (record.n_exposed ?? 0)}
                 </Text>
               </View>
               <View className="flex-row items-center justify-between py-1.5 border-b border-slate-200/60">
                 <Text className="text-[12px] text-slate-600">Mosquitoes Dead (24h)</Text>
                 <Text className="text-[12.5px] font-mono font-bold text-slate-900">
-                  {record.n_dead ?? 0}
+                  {isBioassayPending ? 'Pending (Rearing)' : (record.n_dead ?? 0)}
                 </Text>
               </View>
               <View className="flex-row items-center justify-between py-1.5 pt-2.5">

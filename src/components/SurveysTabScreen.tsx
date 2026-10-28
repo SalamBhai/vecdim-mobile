@@ -376,6 +376,10 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
               const mortality = item.mortality_pct ?? 0;
               const isHighResistance = mortality < 90;
               const isSusceptible = mortality >= 98;
+              const isBioassayPending =
+                !item.n_exposed ||
+                item.n_exposed === 0 ||
+                item.who_class?.toLowerCase().includes('pending');
 
               return (
                 <Pressable
@@ -448,59 +452,83 @@ export const SurveysTabScreen: React.FC<SurveysTabScreenProps> = ({
                     )}
                   </View>
 
-                  {/* Insecticide Bioassay Box */}
-                  <View className="bg-slate-50/90 rounded-xl p-3 border border-slate-200/60 flex-row items-center justify-between">
-                    <View className="flex-1 mr-2">
-                      <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        INSECTICIDE TESTED
-                      </Text>
-                      <Text className="text-[12.5px] font-bold text-slate-800 mt-0.5">
-                        {item.insecticide || 'Permethrin 0.75%'}
-                      </Text>
-                      <Text className="text-[10.5px] text-slate-500 font-medium mt-0.5">
-                        {item.n_dead ?? 0} knocked down / {item.n_exposed ?? 100} exposed
-                      </Text>
+                  {/* Insecticide Bioassay Box or Bioassay Pending Card */}
+                  {isBioassayPending ? (
+                    <View className="bg-amber-50/70 rounded-xl p-3 border border-amber-200/80 flex-row items-center justify-between">
+                      <View className="flex-1 mr-2">
+                        <Text className="text-[10px] font-bold uppercase tracking-wider text-amber-800 font-bricolage">
+                          STAGE 1: LARVAL FIELD COLLECTION
+                        </Text>
+                        <Text className="text-[12.5px] font-bold text-slate-800 mt-0.5">
+                          Larvae Rearing in Insectary
+                        </Text>
+                        <Text className="text-[10.5px] text-slate-500 font-medium mt-0.5">
+                          Density: {item.larval_density ?? 0} /dip • Tube bioassay awaiting adults
+                        </Text>
+                      </View>
+                      <View className="px-2.5 py-1.5 rounded-xl bg-amber-100 border border-amber-300 items-end">
+                        <Text className="text-[10px] font-bold text-amber-900 font-bricolage">
+                          Bioassay Pending
+                        </Text>
+                        <Text className="text-[9px] text-amber-700 font-medium mt-0.5">
+                          Day 1–7 Rearing
+                        </Text>
+                      </View>
                     </View>
+                  ) : (
+                    <View className="bg-slate-50/90 rounded-xl p-3 border border-slate-200/60 flex-row items-center justify-between">
+                      <View className="flex-1 mr-2">
+                        <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          INSECTICIDE TESTED
+                        </Text>
+                        <Text className="text-[12.5px] font-bold text-slate-800 mt-0.5">
+                          {item.insecticide || 'Permethrin 0.75%'}
+                        </Text>
+                        <Text className="text-[10.5px] text-slate-500 font-medium mt-0.5">
+                          {item.n_dead ?? 0} knocked down / {item.n_exposed ?? 100} exposed
+                        </Text>
+                      </View>
 
-                    {/* WHO Mortality Badge */}
-                    <View
-                      className={`px-3 py-1.5 rounded-xl border items-end ${
-                        isHighResistance
-                          ? 'bg-rose-50 border-rose-300'
-                          : isSusceptible
-                          ? 'bg-emerald-50 border-emerald-300'
-                          : 'bg-amber-50 border-amber-300'
-                      }`}
-                    >
-                      <View className="flex-row items-baseline">
+                      {/* WHO Mortality Badge */}
+                      <View
+                        className={`px-3 py-1.5 rounded-xl border items-end ${
+                          isHighResistance
+                            ? 'bg-rose-50 border-rose-300'
+                            : isSusceptible
+                            ? 'bg-emerald-50 border-emerald-300'
+                            : 'bg-amber-50 border-amber-300'
+                        }`}
+                      >
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-[15px] font-black font-mono ${
+                              isHighResistance
+                                ? 'text-rose-700'
+                                : isSusceptible
+                                ? 'text-emerald-700'
+                                : 'text-amber-800'
+                            }`}
+                          >
+                            {Number(mortality).toFixed(1)}%
+                          </Text>
+                          <Text className="text-[9.5px] text-slate-400 font-normal ml-0.5">
+                            mort.
+                          </Text>
+                        </View>
                         <Text
-                          className={`text-[15px] font-black font-mono ${
+                          className={`text-[9px] font-extrabold uppercase tracking-tight mt-0.5 ${
                             isHighResistance
                               ? 'text-rose-700'
                               : isSusceptible
-                              ? 'text-emerald-700'
+                              ? 'text-emerald-800'
                               : 'text-amber-800'
                           }`}
                         >
-                          {Number(mortality).toFixed(1)}%
-                        </Text>
-                        <Text className="text-[9.5px] text-slate-400 font-normal ml-0.5">
-                          mort.
+                          {item.who_class || (isHighResistance ? 'Confirmed Resistance' : 'Susceptible')}
                         </Text>
                       </View>
-                      <Text
-                        className={`text-[9px] font-extrabold uppercase tracking-tight mt-0.5 ${
-                          isHighResistance
-                            ? 'text-rose-700'
-                            : isSusceptible
-                            ? 'text-emerald-800'
-                            : 'text-amber-800'
-                        }`}
-                      >
-                        {item.who_class || (isHighResistance ? 'Confirmed Resistance' : 'Susceptible')}
-                      </Text>
                     </View>
-                  </View>
+                  )}
 
                   {/* Larval Density & Footer Details */}
                   <View className="flex-row items-center justify-between mt-2.5 pt-2 border-t border-slate-100">
