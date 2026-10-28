@@ -1,7 +1,7 @@
 # PROPRIETARY & CONFIDENTIAL — EVALUATION LICENSE
 
 **Software Title:** Vector-Borne Disease Early Warning & Field Ingestion Platform (VECDIM) — Mobile Client  
-**Author & Copyright Holder:** Sheriffdeen Saula (`salambhai.dev`)  
+**Author & Copyright Holder:** Sheriffdeen Saula (`saulasheriffdeen@gmail.com`)  
 **Submission Context:** Technical Assessment for Lead Developer (Mobile App & Backend)  
 **Assigned Reviewers:** Osun State University (UNIOSUN), MOOD Africa, Dev-Afrique, and National Malaria Elimination Programme (NMEP) (`moodafrica@uniosun.edu.ng`)  
 **Effective Date:** October 2026  
@@ -36,5 +36,5 @@ This evaluation license automatically terminates upon the conclusion of the recr
 
 **Contact & Inquiries:**  
 Sheriffdeen Saula  
-Portfolio: [https://salambhai.dev](https://salambhai.dev)  
+Email: [saulasheriffdeen@gmail.com](mailto:saulasheriffdeen@gmail.com)  
 Candidate for Lead Developer (Mobile App & Backend) — VECDIM

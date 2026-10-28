@@ -2,7 +2,7 @@
 **Vector-Borne Disease Early Warning & Field Ingestion Platform**  
 *Technical Assessment Submission — Lead Developer (Mobile App & Backend)*  
 *Osun State University (UNIOSUN) | MOOD Africa | Dev-Afrique | NMEP*  
-*Applicant: Sheriffdeen Saula (`salambhai.dev`)*
+*Applicant: Sheriffdeen Saula (`saulasheriffdeen@gmail.com`)*
 
 ---
 
