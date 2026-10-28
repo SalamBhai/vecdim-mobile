@@ -360,315 +360,287 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     </Text>
                   </View>
                 </View>
-                <View className="px-2 py-0.5 rounded-md bg-blue-100 border border-blue-200">
-                  <Text className="text-[9px] font-bold text-blue-800">Field Sample</Text>
+                <View className={`px-2 py-0.5 rounded-md border ${isLarvalLocked ? 'bg-slate-200 border-slate-300' : 'bg-blue-100 border-blue-200'}`}>
+                  <Text className={`text-[9px] font-bold ${isLarvalLocked ? 'text-slate-700' : 'text-blue-800'}`}>
+                    {isLarvalLocked ? '🔒 Field Record (Locked)' : 'Field Sample'}
+                  </Text>
                 </View>
               </View>
 
-              {/* State Selection (National Director only) */}
-              {currentUser?.role === 'uniosun' && (
-                <View className="mb-3">
-                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-bricolage">
-                    State
-                  </Text>
-                  <View className="flex-row space-x-1.5">
-                    {STATES.map((s) => (
-                      <Pressable
-                        key={s}
-                        onPress={() => {
-                          setSelectedState(s);
-                          const lgas = getLGAsForState(s);
-                          if (lgas.length > 0) setSelectedLga(lgas[0]);
-                        }}
-                        className={`px-3 py-1.5 rounded-xl border mr-1.5 ${
-                          selectedState === s
-                            ? 'bg-slate-900 border-slate-900'
-                            : 'bg-white border-slate-200'
-                        }`}
-                      >
-                        <Text
-                          className={`text-[11px] font-bold ${
-                            selectedState === s ? 'text-white' : 'text-slate-700'
+              {/* Form Input Fields Container: Locked when filling tube test */}
+              <View pointerEvents={isLarvalLocked ? 'none' : 'auto'} className={isLarvalLocked ? 'opacity-70' : ''}>
+                {/* State Selection (National Director only) */}
+                {currentUser?.role === 'uniosun' && (
+                  <View className="mb-3">
+                    <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-bricolage">
+                      State
+                    </Text>
+                    <View className="flex-row space-x-1.5">
+                      {STATES.map((s) => (
+                        <Pressable
+                          key={s}
+                          onPress={() => {
+                            setSelectedState(s);
+                            const lgas = getLGAsForState(s);
+                            if (lgas.length > 0) setSelectedLga(lgas[0]);
+                          }}
+                          className={`px-3 py-1.5 rounded-xl border mr-1.5 ${
+                            selectedState === s
+                              ? 'bg-slate-900 border-slate-900'
+                              : 'bg-white border-slate-200'
                           }`}
                         >
-                          {s} State
-                        </Text>
-                      </Pressable>
-                    ))}
+                          <Text
+                            className={`text-[11px] font-bold ${
+                              selectedState === s ? 'text-white' : 'text-slate-700'
+                            }`}
+                          >
+                            {s} State
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* 1. Two-Column Row: LGA Dropdown & Ward Input */}
+                <View className="flex-row gap-2.5 mb-3.5">
+                  {/* LGA Dropdown */}
+                  <View className="flex-1">
+                    <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
+                      LGA ({selectedState.toUpperCase()})
+                    </Text>
+                    <Pressable
+                      onPress={() => setShowLgaPicker(!showLgaPicker)}
+                      className="border border-slate-200 rounded-2xl px-3.5 py-3 bg-white flex-row items-center justify-between shadow-xs active:bg-slate-50"
+                    >
+                      <Text className="text-[13px] font-semibold text-slate-800" numberOfLines={1}>
+                        {selectedLga}
+                      </Text>
+                      <ChevronDown size={15} color="#64748B" />
+                    </Pressable>
+                  </View>
+
+                  {/* Ward Site Input */}
+                  <View className="flex-1">
+                    <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
+                      WARD SITE
+                    </Text>
+                    <TextInput
+                      value={ward}
+                      onChangeText={setWard}
+                      className="border border-slate-200 rounded-2xl px-3.5 py-2.5 bg-white text-[13px] font-semibold text-slate-800"
+                      placeholder="e.g. Ward 04 (Oja-Oba)"
+                      placeholderTextColor="#94A3B8"
+                    />
                   </View>
                 </View>
-              )}
 
-              {/* 1. Two-Column Row: LGA Dropdown & Ward Input */}
-              <View className="flex-row gap-2.5 mb-3.5">
-                {/* LGA Dropdown */}
-                <View className="flex-1">
-                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
-                    LGA ({selectedState.toUpperCase()})
-                  </Text>
-                  <Pressable
-                    onPress={() => !isLarvalLocked && setShowLgaPicker(!showLgaPicker)}
-                    disabled={isLarvalLocked}
-                    className={`border border-slate-200 rounded-2xl px-3.5 py-3 flex-row items-center justify-between shadow-xs ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-white active:bg-slate-50'}`}
-                  >
-                    <Text className="text-[13px] font-semibold text-slate-800" numberOfLines={1}>
-                      {selectedLga}
-                    </Text>
-                    <ChevronDown size={15} color="#64748B" />
-                  </Pressable>
-                </View>
-
-                {/* Ward Site Input */}
-                <View className="flex-1">
-                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 font-bricolage">
-                    WARD SITE
-                  </Text>
-                  <TextInput
-                    value={ward}
-                    onChangeText={setWard}
-                    editable={!isLarvalLocked}
-                    className={`border border-slate-200 rounded-2xl px-3.5 py-2.5 text-[13px] font-semibold text-slate-800 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-white'}`}
-                    placeholder="e.g. Ward 04 (Oja-Oba)"
-                    placeholderTextColor="#94A3B8"
-                  />
-                </View>
-              </View>
-
-              {/* Dropdown list when LGA picker is open */}
-              {showLgaPicker && (
-                <View className="bg-white border border-slate-200 rounded-2xl p-2 mb-3.5 shadow-lg max-h-48">
-                  <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
-                    {getLGAsForState(selectedState).map((lga) => (
-                      <Pressable
-                        key={lga}
-                        onPress={() => {
-                          setSelectedLga(lga);
-                          setShowLgaPicker(false);
-                        }}
-                        className={`px-3 py-2 rounded-xl mb-1 ${
-                          selectedLga === lga ? 'bg-emerald-50' : 'active:bg-slate-50'
-                        }`}
-                      >
-                        <Text
-                          className={`text-[12px] ${
-                            selectedLga === lga
-                              ? 'font-bold text-emerald-800'
-                              : 'font-medium text-slate-700'
+                {/* Dropdown list when LGA picker is open */}
+                {showLgaPicker && (
+                  <View className="bg-white border border-slate-200 rounded-2xl p-2 mb-3.5 shadow-lg max-h-48">
+                    <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+                      {getLGAsForState(selectedState).map((lga) => (
+                        <Pressable
+                          key={lga}
+                          onPress={() => {
+                            setSelectedLga(lga);
+                            setShowLgaPicker(false);
+                          }}
+                          className={`px-3 py-2 rounded-xl mb-1 ${
+                            selectedLga === lga ? 'bg-emerald-50' : 'active:bg-slate-50'
                           }`}
                         >
-                          {lga}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+                          <Text
+                            className={`text-[12px] ${
+                              selectedLga === lga
+                                ? 'font-bold text-emerald-800'
+                                : 'font-medium text-slate-700'
+                            }`}
+                          >
+                            {lga}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
 
-              {/* 2. Breeding Habitat Type: 2x2 Grid */}
-              <View className="mb-3.5">
-                <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-bricolage">
-                  BREEDING HABITAT TYPE
-                </Text>
-                <View className="flex-row gap-2 mb-2">
-                  <Pressable
-                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[0])}
-                    disabled={isLarvalLocked}
-                    className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
-                      habitatType === HABITAT_TYPES[0]
-                        ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
-                        : isLarvalLocked
-                        ? 'bg-slate-50 border-slate-200 opacity-40'
-                        : 'bg-white border-slate-200'
-                    }`}
-                  >
-                    <Text
-                      className={`text-[12px] text-center ${
+                {/* 2. Breeding Habitat Type: 2x2 Grid */}
+                <View className="mb-3.5">
+                  <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-bricolage">
+                    BREEDING HABITAT TYPE
+                  </Text>
+                  <View className="flex-row gap-2 mb-2">
+                    <Pressable
+                      onPress={() => setHabitatType(HABITAT_TYPES[0])}
+                      className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                         habitatType === HABITAT_TYPES[0]
-                          ? 'text-emerald-900 font-bold'
-                          : 'text-slate-600 font-medium'
+                          ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
-                      {HABITAT_TYPES[0]}
-                    </Text>
-                  </Pressable>
+                      <Text
+                        className={`text-[12px] text-center ${
+                          habitatType === HABITAT_TYPES[0]
+                            ? 'text-emerald-900 font-bold'
+                            : 'text-slate-600 font-medium'
+                        }`}
+                      >
+                        {HABITAT_TYPES[0]}
+                      </Text>
+                    </Pressable>
 
-                  <Pressable
-                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[1])}
-                    disabled={isLarvalLocked}
-                    className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
-                      habitatType === HABITAT_TYPES[1]
-                        ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
-                        : isLarvalLocked
-                        ? 'bg-slate-50 border-slate-200 opacity-40'
-                        : 'bg-white border-slate-200'
-                    }`}
-                  >
-                    <Text
-                      className={`text-[12px] text-center ${
+                    <Pressable
+                      onPress={() => setHabitatType(HABITAT_TYPES[1])}
+                      className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                         habitatType === HABITAT_TYPES[1]
-                          ? 'text-emerald-900 font-bold'
-                          : 'text-slate-600 font-medium'
+                          ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
-                      {HABITAT_TYPES[1]}
-                    </Text>
-                  </Pressable>
-                </View>
+                      <Text
+                        className={`text-[12px] text-center ${
+                          habitatType === HABITAT_TYPES[1]
+                            ? 'text-emerald-900 font-bold'
+                            : 'text-slate-600 font-medium'
+                        }`}
+                      >
+                        {HABITAT_TYPES[1]}
+                      </Text>
+                    </Pressable>
+                  </View>
 
-                <View className="flex-row gap-2">
-                  <Pressable
-                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[2])}
-                    disabled={isLarvalLocked}
-                    className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
-                      habitatType === HABITAT_TYPES[2]
-                        ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
-                        : isLarvalLocked
-                        ? 'bg-slate-50 border-slate-200 opacity-40'
-                        : 'bg-white border-slate-200'
-                    }`}
-                  >
-                    <Text
-                      className={`text-[12px] text-center ${
+                  <View className="flex-row gap-2">
+                    <Pressable
+                      onPress={() => setHabitatType(HABITAT_TYPES[2])}
+                      className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                         habitatType === HABITAT_TYPES[2]
-                          ? 'text-emerald-900 font-bold'
-                          : 'text-slate-600 font-medium'
+                          ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
-                      {HABITAT_TYPES[2]}
-                    </Text>
-                  </Pressable>
+                      <Text
+                        className={`text-[12px] text-center ${
+                          habitatType === HABITAT_TYPES[2]
+                            ? 'text-emerald-900 font-bold'
+                            : 'text-slate-600 font-medium'
+                        }`}
+                      >
+                        {HABITAT_TYPES[2]}
+                      </Text>
+                    </Pressable>
 
-                  <Pressable
-                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[3])}
-                    disabled={isLarvalLocked}
-                    className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
-                      habitatType === HABITAT_TYPES[3]
-                        ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
-                        : isLarvalLocked
-                        ? 'bg-slate-50 border-slate-200 opacity-40'
-                        : 'bg-white border-slate-200'
-                    }`}
-                  >
-                    <Text
-                      className={`text-[12px] text-center ${
+                    <Pressable
+                      onPress={() => setHabitatType(HABITAT_TYPES[3])}
+                      className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                         habitatType === HABITAT_TYPES[3]
-                          ? 'text-emerald-900 font-bold'
-                          : 'text-slate-600 font-medium'
+                          ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
-                      {HABITAT_TYPES[3]}
-                    </Text>
-                  </Pressable>
+                      <Text
+                        className={`text-[12px] text-center ${
+                          habitatType === HABITAT_TYPES[3]
+                            ? 'text-emerald-900 font-bold'
+                            : 'text-slate-600 font-medium'
+                        }`}
+                      >
+                        {HABITAT_TYPES[3]}
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
 
-              {/* 3. Larval Sampling & Density Card (Both Dips AND Larvae) */}
-              <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
-                <View className="flex-row items-center justify-between mb-2">
-                  <View className="flex-row items-center">
-                    <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage mr-2">
+                {/* 3. Larval Sampling & Density Card (Both Dips AND Larvae) */}
+                <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
                       LARVAL SAMPLING & DENSITY
                     </Text>
-                    {isLarvalLocked && (
-                      <View className="flex-row items-center bg-slate-200/90 px-2 py-0.5 rounded-full">
-                        <Lock size={10} color="#475569" />
-                        <Text className="text-[9px] font-bold text-slate-600 ml-1">
-                          Read-Only (Day 1)
-                        </Text>
+                    <View className={`flex-row items-center px-2 py-0.5 rounded-md border ${densityBadgeBg}`}>
+                      <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${densityDotColor}`} />
+                      <Text className={`text-[10px] font-bold ${densityBadgeText}`}>
+                        {larvaePerDip} / dip • {densityRiskLabel}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="flex-row gap-2.5">
+                    {/* Dips Taken */}
+                    <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                      <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
+                        DIPS TAKEN (N)
+                      </Text>
+                      <View className="flex-row items-center justify-between">
+                        <Pressable
+                          onPress={() => setDipsCount(Math.max(1, dipsCount - 1))}
+                          className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        >
+                          <Text className="font-bold text-slate-700 text-[15px]">-</Text>
+                        </Pressable>
+                        <TextInput
+                          value={String(dipsCount)}
+                          onChangeText={(t) => {
+                            const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                            setDipsCount(isNaN(val) ? 1 : Math.max(1, val));
+                          }}
+                          keyboardType="number-pad"
+                          selectTextOnFocus={true}
+                          className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
+                        />
+                        <Pressable
+                          onPress={() => setDipsCount(dipsCount + 1)}
+                          className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        >
+                          <Text className="font-bold text-slate-700 text-[15px]">+</Text>
+                        </Pressable>
                       </View>
-                    )}
-                  </View>
-                  <View className={`flex-row items-center px-2 py-0.5 rounded-md border ${densityBadgeBg}`}>
-                    <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${densityDotColor}`} />
-                    <Text className={`text-[10px] font-bold ${densityBadgeText}`}>
-                      {larvaePerDip} / dip • {densityRiskLabel}
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="flex-row gap-2.5">
-                  {/* Dips Taken */}
-                  <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
-                      DIPS TAKEN (N)
-                    </Text>
-                    <View className="flex-row items-center justify-between">
-                      <Pressable
-                        onPress={() => !isLarvalLocked && setDipsCount(Math.max(1, dipsCount - 1))}
-                        disabled={isLarvalLocked}
-                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
-                      >
-                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
-                      </Pressable>
-                      <TextInput
-                        value={String(dipsCount)}
-                        onChangeText={(t) => {
-                          if (isLarvalLocked) return;
-                          const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
-                          setDipsCount(isNaN(val) ? 1 : Math.max(1, val));
-                        }}
-                        editable={!isLarvalLocked}
-                        keyboardType="number-pad"
-                        selectTextOnFocus={!isLarvalLocked}
-                        className={`text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 rounded-lg border border-slate-200 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-slate-50/80'}`}
-                      />
-                      <Pressable
-                        onPress={() => !isLarvalLocked && setDipsCount(dipsCount + 1)}
-                        disabled={isLarvalLocked}
-                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
-                      >
-                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
-                      </Pressable>
                     </View>
-                  </View>
 
-                  {/* Total Larvae Count */}
-                  <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
-                      TOTAL LARVAE (N)
-                    </Text>
-                    <View className="flex-row items-center justify-between">
-                      <Pressable
-                        onPress={() => !isLarvalLocked && setTotalLarvae(Math.max(0, totalLarvae - 1))}
-                        disabled={isLarvalLocked}
-                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
-                      >
-                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
-                      </Pressable>
-                      <TextInput
-                        value={String(totalLarvae)}
-                        onChangeText={(t) => {
-                          if (isLarvalLocked) return;
-                          const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
-                          setTotalLarvae(isNaN(val) ? 0 : Math.max(0, val));
-                        }}
-                        editable={!isLarvalLocked}
-                        keyboardType="number-pad"
-                        selectTextOnFocus={!isLarvalLocked}
-                        className={`text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 rounded-lg border border-slate-200 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-slate-50/80'}`}
-                      />
-                      <Pressable
-                        onPress={() => !isLarvalLocked && setTotalLarvae(totalLarvae + 1)}
-                        disabled={isLarvalLocked}
-                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
-                      >
-                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
-                      </Pressable>
+                    {/* Total Larvae Count */}
+                    <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                      <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
+                        TOTAL LARVAE (N)
+                      </Text>
+                      <View className="flex-row items-center justify-between">
+                        <Pressable
+                          onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 1))}
+                          className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        >
+                          <Text className="font-bold text-slate-700 text-[15px]">-</Text>
+                        </Pressable>
+                        <TextInput
+                          value={String(totalLarvae)}
+                          onChangeText={(t) => {
+                            const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                            setTotalLarvae(isNaN(val) ? 0 : Math.max(0, val));
+                          }}
+                          keyboardType="number-pad"
+                          selectTextOnFocus={true}
+                          className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
+                        />
+                        <Pressable
+                          onPress={() => setTotalLarvae(totalLarvae + 1)}
+                          className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        >
+                          <Text className="font-bold text-slate-700 text-[15px]">+</Text>
+                        </Pressable>
+                      </View>
                     </View>
                   </View>
                 </View>
+
+                {/* 4. GPS Coordinates & Live Accuracy Meter */}
+                <GPSAccuracyMeter
+                  selectedState={selectedState}
+                  selectedLga={selectedLga}
+                  initialLat={gpsData.latitude || currentUser?.defaultLat || 7.7827}
+                  initialLon={gpsData.longitude || currentUser?.defaultLon || 4.5418}
+                  initialAccuracy={gpsData.accuracy || 5.8}
+                  onLocationChange={handleLocationChange}
+                />
               </View>
-
-              {/* 4. GPS Coordinates & Live Accuracy Meter */}
-              <GPSAccuracyMeter
-                selectedState={selectedState}
-                selectedLga={selectedLga}
-                initialLat={gpsData.latitude || currentUser?.defaultLat || 7.7827}
-                initialLon={gpsData.longitude || currentUser?.defaultLon || 4.5418}
-                initialAccuracy={gpsData.accuracy || 5.8}
-                onLocationChange={handleLocationChange}
-                disabled={isLarvalLocked}
-              />
 
               {/* Action Buttons: Save Larval Survey OR Continue WHO Bioassay */}
               <View className="mt-4 mb-2">
