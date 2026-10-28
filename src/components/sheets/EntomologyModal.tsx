@@ -65,12 +65,14 @@ interface EntomologyModalProps {
   visible: boolean;
   onClose: () => void;
   onRecordSaved: (info?: RecordSavedInfo) => void;
+  existingRecord?: LocalFieldRecord | null;
 }
 
 export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   visible,
   onClose,
   onRecordSaved,
+  existingRecord,
 }) => {
   const { currentUser } = useAuth();
   const { isOnline } = useNetwork();
@@ -83,6 +85,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   // Active form section tab: 1. Larval (Field) vs 2. Bioassay (Lab)
   const [activeTab, setActiveTab] = useState<'larval' | 'bioassay'>('larval');
   const [isLarvalLocked, setIsLarvalLocked] = useState<boolean>(false);
+  const [pendingDraft, setPendingDraft] = useState<Record<string, any> | null>(null);
 
   const [selectedState, setSelectedState] = useState<string>(userInitialState);
   const [selectedLga, setSelectedLga] = useState<string>(userInitialLga);
@@ -144,39 +147,83 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
     densityDotColor = 'bg-amber-500';
   }
 
-  // Reset form and synchronize state/LGA defaults whenever modal opens anew
+  // Reset form or load existing pending record whenever modal opens
   useEffect(() => {
     if (visible) {
-      setActiveTab('larval');
-      setIsLarvalLocked(false);
       setShowLgaPicker(false);
 
-      const isNational = currentUser?.role === 'uniosun' || currentUser?.state === 'National';
-      const assigned = isNational ? 'Osun' : (currentUser?.state || 'Osun');
-      setSelectedState(assigned);
-      setSelectedLga(currentUser?.primaryLga && !currentUser.primaryLga.includes('HQ') ? currentUser.primaryLga : (getLGAsForState(assigned)[0] || 'Osogbo'));
-      setWard('');
-      setHabitatType(HABITAT_TYPES[0]);
-      setDipsCount(10);
-      setTotalLarvae(0);
-      setNExposed(100);
-      setNDead(0);
-      setSpecies(VECTOR_SPECIES[0]);
-      setInsecticide(INSECTICIDE_TYPES[0]);
+      if (existingRecord) {
+        // Mode 1: Resuming an existing record to complete WHO Bioassay (Day 7)
+        setActiveTab('bioassay');
+        setIsLarvalLocked(true);
+        setSelectedState(existingRecord.state || 'Osun');
+        setSelectedLga(existingRecord.lga || 'Osogbo');
+        setWard(existingRecord.ward || '');
+        setHabitatType(existingRecord.urban ? HABITAT_TYPES[0] : HABITAT_TYPES[1]);
+        setDipsCount(10);
+        setTotalLarvae(Math.round((existingRecord.larval_density || 0) * 10));
+        setNExposed(existingRecord.n_exposed > 0 ? existingRecord.n_exposed : 100);
+        setNDead(existingRecord.n_dead || 0);
+        setSpecies(existingRecord.species || VECTOR_SPECIES[0]);
+        setInsecticide(existingRecord.insecticide || INSECTICIDE_TYPES[0]);
+        setGpsData({
+          latitude: existingRecord.latitude || currentUser?.defaultLat || 7.7827,
+          longitude: existingRecord.longitude || currentUser?.defaultLon || 4.5418,
+          accuracy: existingRecord.gps_accuracy_m || 5.8,
+          isBlocked: false,
+          proximityResult: null,
+        });
+        setPendingDraft(null);
+      } else {
+        // Mode 2: Starting a brand new survey (Day 1)
+        setActiveTab('larval');
+        setIsLarvalLocked(false);
 
-      setGpsData({
-        latitude: currentUser?.defaultLat || 7.7827,
-        longitude: currentUser?.defaultLon || 4.5418,
-        accuracy: 5.8,
-        isBlocked: false,
-        proximityResult: null,
-      });
+        const isNational = currentUser?.role === 'uniosun' || currentUser?.state === 'National';
+        const assigned = isNational ? 'Osun' : (currentUser?.state || 'Osun');
+        setSelectedState(assigned);
+        setSelectedLga(
+          currentUser?.primaryLga && !currentUser.primaryLga.includes('HQ')
+            ? currentUser.primaryLga
+            : (getLGAsForState(assigned)[0] || 'Osogbo')
+        );
+        setWard('');
+        setHabitatType(HABITAT_TYPES[0]);
+        setDipsCount(10);
+        setTotalLarvae(0);
+        setNExposed(100);
+        setNDead(0);
+        setSpecies(VECTOR_SPECIES[0]);
+        setInsecticide(INSECTICIDE_TYPES[0]);
+
+        setGpsData({
+          latitude: currentUser?.defaultLat || 7.7827,
+          longitude: currentUser?.defaultLon || 4.5418,
+          accuracy: 5.8,
+          isBlocked: false,
+          proximityResult: null,
+        });
+
+        // Check SQLite drafts table for any unfinished draft for this officer
+        (async () => {
+          const draft = await getFormDraft(currentUser?.id);
+          if (
+            draft &&
+            draft.formData &&
+            (draft.formData.ward?.trim() || (draft.formData.totalLarvae && draft.formData.totalLarvae > 0))
+          ) {
+            setPendingDraft(draft.formData);
+          } else {
+            setPendingDraft(null);
+          }
+        })();
+      }
     }
-  }, [visible, currentUser]);
+  }, [visible, currentUser, existingRecord]);
 
-  // Debounced autosave strictly scoped to this officer (only if form has active content)
+  // Debounced autosave strictly scoped to this officer (only for fresh surveys with active content)
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || existingRecord) return;
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(async () => {
       if (ward.trim().length > 0 || totalLarvae > 0) {
@@ -198,7 +245,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
     return () => {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
-  }, [visible, selectedState, selectedLga, ward, habitatType, dipsCount, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
+  }, [visible, existingRecord, selectedState, selectedLga, ward, habitatType, dipsCount, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
 
   const handleLocationChange = useCallback((data: GPSLocationData) => {
     setGpsData(data);
@@ -224,15 +271,15 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         else if (mortalityPct >= 90.0) whoClass = 'Possible Resistance';
       }
 
-      const uuid = 'rec_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+      const uuid = existingRecord?.id || ('rec_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8));
 
       const record: LocalFieldRecord = {
         id: uuid,
-        user_id: currentUser?.id || 'u_field_03',
+        user_id: currentUser?.id || existingRecord?.user_id || 'u_field_03',
         state: selectedState,
         lga: selectedLga,
-        ward,
-        collection_date: new Date().toISOString().split('T')[0],
+        ward: ward.trim() || 'Ward 01 (Field Site)',
+        collection_date: existingRecord?.collection_date || new Date().toISOString().split('T')[0],
         latitude: gpsData.latitude || userInitialLat,
         longitude: gpsData.longitude || userInitialLon,
         gps_accuracy_m: gpsData.accuracy || 5.8,
@@ -248,12 +295,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         itn_use_pct: 65,
         sync_status: 'pending_sync',
         server_error: null,
-        created_at: new Date().toISOString(),
+        created_at: existingRecord?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       await saveFieldRecord(record);
       await clearFormDraft(currentUser?.id);
+      setPendingDraft(null);
       setIsSubmitting(false);
       onRecordSaved({
         bottleLabelId,
@@ -343,6 +391,50 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               nestedScrollEnabled={true}
               bounces={true}
             >
+              {/* Optional Unsaved Draft Recovery Banner */}
+              {pendingDraft && !existingRecord && (
+                <View className="mb-3 p-3 bg-amber-50/90 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between">
+                  <View className="flex-1 mr-2">
+                    <View className="flex-row items-center">
+                      <Text className="text-[12px] mr-1.5">📝</Text>
+                      <Text className="text-[11px] font-bold text-amber-900 font-bricolage">
+                        Unsaved Draft Found
+                      </Text>
+                    </View>
+                    <Text className="text-[10px] text-amber-800 mt-0.5" numberOfLines={1}>
+                      {pendingDraft.ward || 'Unnamed site'} • {pendingDraft.dipsCount || 10} dips • {pendingDraft.totalLarvae || 0} larvae
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-1.5">
+                    <Pressable
+                      onPress={() => {
+                        if (pendingDraft.selectedState) setSelectedState(pendingDraft.selectedState);
+                        if (pendingDraft.selectedLga) setSelectedLga(pendingDraft.selectedLga);
+                        if (pendingDraft.ward) setWard(pendingDraft.ward);
+                        if (pendingDraft.habitatType) setHabitatType(pendingDraft.habitatType);
+                        if (pendingDraft.dipsCount) setDipsCount(pendingDraft.dipsCount);
+                        if (pendingDraft.totalLarvae) setTotalLarvae(pendingDraft.totalLarvae);
+                        if (pendingDraft.species) setSpecies(pendingDraft.species);
+                        if (pendingDraft.insecticide) setInsecticide(pendingDraft.insecticide);
+                        setPendingDraft(null);
+                      }}
+                      className="px-2.5 py-1.5 bg-amber-600 rounded-lg active:bg-amber-700"
+                    >
+                      <Text className="text-white text-[10.5px] font-bold font-bricolage">Resume</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={async () => {
+                        await clearFormDraft(currentUser?.id);
+                        setPendingDraft(null);
+                      }}
+                      className="px-2.5 py-1.5 bg-white border border-amber-300 rounded-lg active:bg-amber-100"
+                    >
+                      <Text className="text-amber-800 text-[10.5px] font-bold font-bricolage">Discard</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+
               {/* Bottle Label ID Card */}
               <View className="flex-row items-center justify-between p-3 bg-blue-50/80 rounded-2xl border border-blue-200/80 mb-3 shadow-xs">
                 <View className="flex-row items-center flex-1 mr-2">

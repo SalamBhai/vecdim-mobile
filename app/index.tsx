@@ -33,11 +33,12 @@ import { SentinelHeroCard } from '../src/components/SentinelHeroCard';
 import { TransectRouteMap } from '../src/components/TransectRouteMap';
 import { SurveysTabScreen } from '../src/components/SurveysTabScreen';
 import { EntomologyModal, RecordSavedInfo } from '../src/components/sheets/EntomologyModal';
+import { SurveyDetailModal } from '../src/components/sheets/SurveyDetailModal';
 import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
 import { Dhis2Modal } from '../src/components/sheets/Dhis2Modal';
 import { AuthModal } from '../src/components/sheets/AuthModal';
-import { getAllRecords } from '../src/storage/db';
+import { getAllRecords, LocalFieldRecord } from '../src/storage/db';
 import { fetchServerRecords, ServerRecord } from '../src/api/client';
 
 export default function MainAppScreen() {
@@ -74,6 +75,8 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   const [activeModal, setActiveModal] = useState<
     'entomology' | 'queue' | 'alerts' | 'dhis2' | 'auth' | null
   >(null);
+  const [viewingDetailRecord, setViewingDetailRecord] = useState<any | null>(null);
+  const [editingPendingRecord, setEditingPendingRecord] = useState<LocalFieldRecord | null>(null);
 
   // Non-blocking auto-dismissing toast notification
   const [toastMessage, setToastMessage] = useState<{
@@ -237,7 +240,10 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         <View className="flex-row mb-4 gap-2">
           {/* Action 1: Malaria */}
           <Pressable
-            onPress={() => setActiveModal('entomology')}
+            onPress={() => {
+              setEditingPendingRecord(null);
+              setActiveModal('entomology');
+            }}
             className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
             <View className="w-10 h-10 rounded-xl bg-emerald-50 items-center justify-center mb-1.5">
@@ -331,11 +337,18 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
 
           {/* Staged pending local scans first */}
           {pendingLocalRecords.map((item) => {
-            const isPending = item.who_class?.toLowerCase().includes('pending');
+            const isPendingBioassay = item.who_class?.toLowerCase().includes('pending');
             return (
               <Pressable
                 key={`local-${item.id}`}
-                onPress={() => setActiveModal('queue')}
+                onPress={() => {
+                  if (isPendingBioassay) {
+                    setEditingPendingRecord(item);
+                    setActiveModal('entomology');
+                  } else {
+                    setViewingDetailRecord({ ...item, source: 'local' });
+                  }
+                }}
                 className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-amber-100/60"
               >
                 <View className="flex-row items-center flex-1 mr-3">
@@ -353,12 +366,12 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 </View>
 
                 <View className="items-end justify-center shrink-0">
-                  <View className={`px-2 py-0.5 rounded-full bg-amber-200 border border-amber-300 ${!isPending ? 'mb-1' : ''}`}>
+                  <View className={`px-2 py-0.5 rounded-full bg-amber-200 border border-amber-300 ${!isPendingBioassay ? 'mb-1' : ''}`}>
                     <Text className="text-[8.5px] font-black text-amber-900 uppercase">
                       Pending Sync
                     </Text>
                   </View>
-                  {!isPending && (
+                  {!isPendingBioassay && (
                     <Text className="text-[10px] font-medium text-amber-800">
                       {item.mortality_pct}% mort.
                     </Text>
@@ -372,7 +385,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {serverRecords.map((item) => (
             <Pressable
               key={`server-${item.id}`}
-              onPress={() => setActiveModal('entomology')}
+              onPress={() => setViewingDetailRecord({ ...item, source: 'server' })}
               className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-slate-50"
             >
               <View className="flex-row items-center flex-1 mr-3">
@@ -415,7 +428,10 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 Your {currentUser.state} sentinel grid is active. Tap below to capture your first NMEP Form E-1 survey.
               </Text>
               <Pressable
-                onPress={() => setActiveModal('entomology')}
+                onPress={() => {
+                  setEditingPendingRecord(null);
+                  setActiveModal('entomology');
+                }}
                 className="mt-3.5 px-4 py-2.5 rounded-xl bg-emerald-600 flex-row items-center shadow-xs active:bg-emerald-700"
               >
                 <Plus size={15} color="#FFFFFF" />
@@ -435,9 +451,16 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             pendingLocalRecords={pendingLocalRecords}
             loadingServer={loadingServer}
             onRefresh={handleRefreshAll}
-            onOpenCapture={() => setActiveModal('entomology')}
+            onOpenCapture={() => {
+              setEditingPendingRecord(null);
+              setActiveModal('entomology');
+            }}
             onOpenQueue={() => setActiveModal('queue')}
             onOpenAlerts={() => setActiveModal('alerts')}
+            onCompleteBioassay={(rec) => {
+              setEditingPendingRecord(rec as LocalFieldRecord);
+              setActiveModal('entomology');
+            }}
           />
         )}
       </SafeAreaView>
@@ -490,7 +513,10 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {/* Elevated Floating Center Scan / Capture Button */}
           <View className="items-center justify-center flex-1">
             <Pressable
-              onPress={() => setActiveModal('entomology')}
+              onPress={() => {
+                setEditingPendingRecord(null);
+                setActiveModal('entomology');
+              }}
               className="w-13 h-13 rounded-2xl bg-slate-950 items-center justify-center shadow-xl shadow-slate-950/40 active:scale-95 -mt-6 border-4 border-white"
               style={{ width: 54, height: 54 }}
             >
@@ -532,8 +558,27 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
       {/* 3. SLIDE-UP MODALS */}
       <EntomologyModal
         visible={activeModal === 'entomology'}
-        onClose={() => setActiveModal(null)}
+        onClose={() => {
+          setActiveModal(null);
+          setEditingPendingRecord(null);
+        }}
         onRecordSaved={handleRecordSaved}
+        existingRecord={editingPendingRecord}
+      />
+
+      <SurveyDetailModal
+        visible={!!viewingDetailRecord}
+        onClose={() => setViewingDetailRecord(null)}
+        record={viewingDetailRecord}
+        onOpenQueue={() => {
+          setViewingDetailRecord(null);
+          setActiveModal('queue');
+        }}
+        onCompleteBioassay={(rec) => {
+          setViewingDetailRecord(null);
+          setEditingPendingRecord(rec as LocalFieldRecord);
+          setActiveModal('entomology');
+        }}
       />
 
       <QueueModal
