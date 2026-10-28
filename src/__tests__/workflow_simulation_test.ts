@@ -105,13 +105,13 @@ class MockSQLiteDB {
   }
 }
 
-async function runAllCases() {
-  console.log('===============================================================');
-  console.log('🚀 RUNNING ALL VECDIM WORKFLOW CASES (OFFLINE TO BACKEND SYNC)');
-  console.log('===============================================================\n');
+async function runCasesForOfficer(officer: DemoUser) {
+  console.log('---------------------------------------------------------------');
+  console.log(`👤 OFFICER TEST RUN: ${officer.name} (${officer.id})`);
+  console.log(`   Title: ${officer.title} • State: ${officer.state} • LGA: ${officer.primaryLga}`);
+  console.log('---------------------------------------------------------------');
 
   const db = new MockSQLiteDB();
-  const officer: DemoUser = DEMO_USERS[0]; // Tega Babalola, Osun, Osogbo
   const API_BASE = 'http://localhost:8080/api/v1';
 
   // -------------------------------------------------------------------------
@@ -170,24 +170,26 @@ async function runAllCases() {
   // -------------------------------------------------------------------------
   console.log('📍 CASE 3: Phase 1 Larval Field Sampling (Offline / Bioassay Pending)');
   const clientUuid = `rec_test_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
-  const bottleLabelId = 'OS-OSG-W04-A1';
+  const stateCode = officer.state === 'Lagos' ? 'LA' : officer.state === 'Kano' ? 'KN' : 'OS';
+  const lgaCode = officer.primaryLga.substring(0, 3).toUpperCase();
+  const bottleLabelId = `${stateCode}-${lgaCode}-W04-A1`;
 
   // Spatial verification
-  const osogboRef = getLGARef('Osun', 'Osogbo')!;
-  const spatialCheck = checkLGAProximity(7.7827, 4.5418, osogboRef.refLat, osogboRef.refLon, 'Osogbo');
-  console.log(`- GPS Fix: (7.7827, 4.5418) -> Within 25km LGA boundary: ${spatialCheck.isWithinThreshold}`);
+  const lgaRef = getLGARef(officer.state, officer.primaryLga)!;
+  const spatialCheck = checkLGAProximity(officer.defaultLat, officer.defaultLon, lgaRef.refLat, lgaRef.refLon, officer.primaryLga);
+  console.log(`- GPS Fix: (${officer.defaultLat}, ${officer.defaultLon}) -> Within 25km LGA boundary: ${spatialCheck.isWithinThreshold}`);
   if (!spatialCheck.isWithinThreshold) throw new Error('Case 3 Failed: GPS out of bounds');
 
   // Phase 1 Record Creation
   const phase1Record: LocalFieldRecord = {
     id: clientUuid,
     user_id: officer.id,
-    state: 'Osun',
-    lga: 'Osogbo',
-    ward: 'Ward 04 (Oja-Oba Central)',
+    state: officer.state,
+    lga: officer.primaryLga,
+    ward: `Ward 04 (${officer.primaryLga} Central)`,
     collection_date: '2026-10-28',
-    latitude: 7.7827,
-    longitude: 4.5418,
+    latitude: officer.defaultLat,
+    longitude: officer.defaultLon,
     gps_accuracy_m: 4.2,
     species: 'Anopheles gambiae s.l.',
     insecticide: 'Permethrin (0.75%)',
@@ -385,12 +387,30 @@ async function runAllCases() {
     throw err;
   }
 
+  console.log(`🎉 ALL 7 CASES VERIFIED FOR ${officer.name} (${officer.id})!\n`);
+}
+
+async function runTestSuite() {
   console.log('===============================================================');
-  console.log('🎉 ALL 7 VECDIM USE CASES AND WORKFLOWS VERIFIED WITH 100% SUCCESS!');
+  console.log('🚀 RUNNING ALL VECDIM WORKFLOW CASES ACROSS SENTINEL OFFICERS');
+  console.log('===============================================================\n');
+
+  // Test across all 3 Sentinel Field Officers:
+  // 1. Biodun Adeleke (Lagos - u_field_01) [Currently active in iOS Simulator]
+  // 2. Tega Babalola (Osun - u_field_03)
+  // 3. Aminu Bello (Kano - u_field_02)
+  const officersToTest = [DEMO_USERS[1], DEMO_USERS[0], DEMO_USERS[2]];
+
+  for (const officer of officersToTest) {
+    await runCasesForOfficer(officer);
+  }
+
+  console.log('===============================================================');
+  console.log('🏆 100% SUITE PASS: ALL 3 OFFICERS & 21 CASES FULLY VERIFIED!');
   console.log('===============================================================');
 }
 
-runAllCases().catch((err) => {
+runTestSuite().catch((err) => {
   console.error('❌ Test Execution Failed:', err);
   process.exit(1);
 });
