@@ -99,6 +99,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
           if (d.selectedLga) setSelectedLga(d.selectedLga);
           if (d.ward) setWard(d.ward);
           if (d.habitatType) setHabitatType(d.habitatType);
+          if (d.dipsCount) setDipsCount(d.dipsCount);
           if (d.totalLarvae) setTotalLarvae(d.totalLarvae);
           if (d.nExposed) setNExposed(d.nExposed);
           if (d.nDead) setNDead(d.nDead);
@@ -116,6 +117,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         selectedLga,
         ward,
         habitatType,
+        dipsCount,
         totalLarvae,
         nExposed,
         nDead,
@@ -127,7 +129,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
     return () => {
       if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     };
-  }, [selectedState, selectedLga, ward, habitatType, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
+  }, [selectedState, selectedLga, ward, habitatType, dipsCount, totalLarvae, nExposed, nDead, species, insecticide, currentUser?.id]);
 
   const handleLocationChange = useCallback((data: GPSLocationData) => {
     setGpsData(data);
@@ -410,36 +412,79 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </View>
             </View>
 
-            {/* 3. Dips / Larvae Count Stepper Card */}
-            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex-row items-center justify-between mb-3.5 shadow-xs">
-              <View>
-                <Text className="text-[13.5px] font-bold text-slate-800 font-bricolage">
-                  Dips / Larvae Count
+            {/* 3. Larval Sampling & Density Card (Both Dips AND Larvae) */}
+            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
+                  LARVAL SAMPLING & DENSITY
                 </Text>
-                <Text className="text-[11.5px] text-slate-500 font-medium mt-0.5">
-                  Density:{' '}
-                  <Text className="font-bold text-emerald-700">
-                    {larvaePerDip} / dip
+                <View className="flex-row items-center bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  <Text className="text-[10px] font-bold text-emerald-800">
+                    Density: {larvaePerDip} / dip
                   </Text>
-                </Text>
+                </View>
               </View>
 
-              <View className="flex-row items-center space-x-2">
-                <Pressable
-                  onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 20))}
-                  className="w-9 h-9 rounded-xl bg-white border border-slate-300 items-center justify-center mr-2 active:bg-slate-100 shadow-xs"
-                >
-                  <Text className="font-bold text-slate-700 text-[16px]">-</Text>
-                </Pressable>
-                <Text className="text-[15px] font-extrabold w-11 text-center text-slate-900 font-mono">
-                  {totalLarvae}
-                </Text>
-                <Pressable
-                  onPress={() => setTotalLarvae(totalLarvae + 20)}
-                  className="w-9 h-9 rounded-xl bg-white border border-slate-300 items-center justify-center ml-2 active:bg-slate-100 shadow-xs"
-                >
-                  <Text className="font-bold text-slate-700 text-[16px]">+</Text>
-                </Pressable>
+              <View className="flex-row gap-2.5">
+                {/* Dips Taken */}
+                <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                  <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    DIPS TAKEN (N)
+                  </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => setDipsCount(Math.max(1, dipsCount - 1))}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                    </Pressable>
+                    <TextInput
+                      value={String(dipsCount)}
+                      onChangeText={(t) => {
+                        const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                        setDipsCount(isNaN(val) ? 1 : Math.max(1, val));
+                      }}
+                      keyboardType="number-pad"
+                      className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                    />
+                    <Pressable
+                      onPress={() => setDipsCount(dipsCount + 1)}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* Total Larvae Count */}
+                <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                  <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    TOTAL LARVAE (N)
+                  </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 10))}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                    </Pressable>
+                    <TextInput
+                      value={String(totalLarvae)}
+                      onChangeText={(t) => {
+                        const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                        setTotalLarvae(isNaN(val) ? 0 : Math.max(0, val));
+                      }}
+                      keyboardType="number-pad"
+                      className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                    />
+                    <Pressable
+                      onPress={() => setTotalLarvae(totalLarvae + 10)}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                    </Pressable>
+                  </View>
+                </View>
               </View>
             </View>
 
