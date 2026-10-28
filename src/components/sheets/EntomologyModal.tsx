@@ -106,6 +106,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tab2ScrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (activeTab === 'bioassay') {
+      tab2ScrollRef.current?.scrollTo({ y: 0, animated: false });
+    }
+  }, [activeTab]);
 
   // Derived Physical Bottle Label ID (written on the physical sample collection bottle)
   const bottleLabelId = useMemo(() => {
@@ -704,6 +711,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
           ) : (
             /* Tab 2: WHO Bioassay (Lab) */
             <ScrollView
+              ref={tab2ScrollRef}
               className="flex-1"
               showsVerticalScrollIndicator={true}
               contentContainerStyle={{ paddingBottom: 70, paddingTop: 4 }}
@@ -711,24 +719,60 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               nestedScrollEnabled={true}
               bounces={true}
             >
-              {/* Sample Linkage Card */}
+              {/* Locked Field Sampling Data (Read-Only on Tab 2) */}
               <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
-                <View className="flex-row items-center justify-between">
-                  <View>
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
-                      LINKED FIELD SAMPLE
+                <View className="flex-row items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                  <View className="flex-row items-center">
+                    <Lock size={12} color="#059669" />
+                    <Text className="text-[10px] font-bold text-slate-700 uppercase tracking-wider ml-1.5 font-bricolage">
+                      FIELD LARVAL SAMPLE (READ-ONLY)
                     </Text>
-                    <Text className="text-[13px] font-mono font-black text-slate-900 mt-0.5">
+                  </View>
+                  <View className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-200">
+                    <Text className="text-[9.5px] font-bold text-emerald-800 font-mono">
                       {bottleLabelId}
                     </Text>
                   </View>
+                </View>
+
+                <View className="flex-row justify-between mb-1.5">
+                  <View className="flex-1 mr-2">
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      Location & Ward
+                    </Text>
+                    <Text className="text-[12px] font-bold text-slate-800" numberOfLines={1}>
+                      {selectedLga} • {ward}
+                    </Text>
+                  </View>
                   <View className="items-end">
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider font-bricolage">
-                      SITE
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      Habitat
                     </Text>
-                    <Text className="text-[11px] font-bold text-slate-700 mt-0.5">
-                      {selectedLga} • {ward.split(' ')[0] || 'Ward'}
+                    <Text className="text-[12px] font-bold text-slate-700">
+                      {habitatType}
                     </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row justify-between pt-1.5 border-t border-slate-200/60 items-center">
+                  <View>
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      Collection Count
+                    </Text>
+                    <Text className="text-[11.5px] font-mono font-bold text-slate-800">
+                      {dipsCount} dips • {totalLarvae} larvae
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                      Larval Density
+                    </Text>
+                    <View className="flex-row items-center">
+                      <View className={`w-1.5 h-1.5 rounded-full mr-1 ${densityDotColor}`} />
+                      <Text className="text-[11.5px] font-mono font-bold text-slate-900">
+                        {larvaePerDip} / dip
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
