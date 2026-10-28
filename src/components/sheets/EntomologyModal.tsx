@@ -444,25 +444,87 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
             </View>
 
             {/* 4. WHO Bioassay Tube-Test Calculation */}
-            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5">
-              <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-bricolage">
-                WHO TUBE-TEST BIOASSAY
-              </Text>
-              <View className="flex-row mb-2">
-                <View className="flex-1 mr-2">
-                  <Text className="text-[10px] font-semibold text-slate-400">EXPOSED</Text>
-                  <Text className="text-[15px] font-bold text-slate-800 font-mono">
-                    {nExposed}
+            <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
+                  WHO TUBE-TEST BIOASSAY
+                </Text>
+                <Text className="text-[10px] text-slate-400 font-medium">
+                  Editable Exposed & Dead Counts
+                </Text>
+              </View>
+
+              {/* Interactive Inputs for Exposed & Dead Mosquitoes */}
+              <View className="flex-row gap-2.5 mb-2">
+                {/* Exposed Mosquitoes */}
+                <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                  <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    EXPOSED (N)
                   </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => {
+                        const next = Math.max(10, nExposed - 5);
+                        setNExposed(next);
+                        if (nDead > next) setNDead(next);
+                      }}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                    </Pressable>
+                    <TextInput
+                      value={String(nExposed)}
+                      onChangeText={(t) => {
+                        const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                        const nextExposed = isNaN(val) ? 0 : val;
+                        setNExposed(nextExposed);
+                        if (nDead > nextExposed) setNDead(nextExposed);
+                      }}
+                      keyboardType="number-pad"
+                      className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                    />
+                    <Pressable
+                      onPress={() => setNExposed(nExposed + 5)}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                    </Pressable>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-[10px] font-semibold text-slate-400">DEAD</Text>
-                  <Text className="text-[15px] font-bold text-slate-800 font-mono">
-                    {nDead}
+
+                {/* Dead Mosquitoes */}
+                <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                  <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    DEAD (N)
                   </Text>
+                  <View className="flex-row items-center justify-between">
+                    <Pressable
+                      onPress={() => setNDead(Math.max(0, nDead - 5))}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                    </Pressable>
+                    <TextInput
+                      value={String(nDead)}
+                      onChangeText={(t) => {
+                        const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
+                        const nextDead = isNaN(val) ? 0 : Math.min(val, nExposed);
+                        setNDead(nextDead);
+                      }}
+                      keyboardType="number-pad"
+                      className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                    />
+                    <Pressable
+                      onPress={() => setNDead(Math.min(nExposed, nDead + 5))}
+                      className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                    >
+                      <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                    </Pressable>
+                  </View>
                 </View>
               </View>
 
+              {/* Dynamic Live WHO Mortality Badge */}
               <WHOMortalityBadge nExposed={nExposed} nDead={nDead} />
             </View>
 
