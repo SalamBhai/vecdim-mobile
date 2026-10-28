@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -159,13 +160,14 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         if (currentUser.role === 'vecdim') {
           return await fetchServerRecords(currentUser.id, currentUser.state);
         }
-        // Field officer fetches their records scoped to their jurisdiction
-        return await fetchServerRecords(currentUser.id, currentUser.state, currentUser.primaryLga);
+        // Field officer fetches their records across any surveyed LGA
+        return await fetchServerRecords(currentUser.id, currentUser.state);
       } catch {
         return { count: 0, records: [] };
       }
     },
     enabled: !!currentUser.id,
+    refetchInterval: 3000,
   });
 
   // Load local offline records scoped to this authenticated officer
@@ -205,6 +207,9 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 }}
             className="flex-1"
+            refreshControl={
+              <RefreshControl refreshing={loadingServer} onRefresh={handleRefreshAll} />
+            }
           >
           {/* Header Profile Bar */}
           <View className="flex-row items-center justify-between mb-4">
