@@ -23,6 +23,7 @@ import {
   saveFieldRecord,
   LocalFieldRecord,
 } from '../storage/db';
+import { generateUUID } from '../utils/uuid';
 
 const SPECIES_OPTIONS = [
   'Anopheles gambiae s.l.',
@@ -201,12 +202,7 @@ export const EntomologyFormScreen: React.FC<{ onNavigateToOutbox?: () => void }>
       if (mortalityPct >= 98.0) whoClass = 'Susceptible';
       else if (mortalityPct >= 90.0) whoClass = 'Possible Resistance';
 
-      const uuid =
-        recordId ||
-        'rec_' +
-          Date.now().toString(36) +
-          '_' +
-          Math.random().toString(36).substring(2, 9);
+      const uuid = recordId || generateUUID();
 
       const record: LocalFieldRecord = {
         id: uuid,

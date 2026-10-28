@@ -32,6 +32,7 @@ import {
 } from '../../storage/db';
 import { useAuth } from '../../context/AuthContext';
 import { useNetwork } from '../../context/NetworkContext';
+import { generateUUID } from '../../utils/uuid';
 
 const HABITAT_TYPES = [
   'Drainage / Gutter',
@@ -271,7 +272,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
         else if (mortalityPct >= 90.0) whoClass = 'Possible Resistance';
       }
 
-      const uuid = existingRecord?.id || ('rec_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8));
+      const uuid = existingRecord?.id || generateUUID();
 
       const record: LocalFieldRecord = {
         id: uuid,
