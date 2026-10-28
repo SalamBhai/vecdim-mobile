@@ -449,9 +449,6 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
                   WHO TUBE-TEST BIOASSAY
                 </Text>
-                <Text className="text-[10px] text-slate-400 font-medium">
-                  Editable Exposed & Dead Counts
-                </Text>
               </View>
 
               {/* Interactive Inputs for Exposed & Dead Mosquitoes */}
