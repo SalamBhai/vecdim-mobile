@@ -7,6 +7,8 @@ import { useAuth } from './AuthContext';
 
 interface NetworkContextType {
   isOnline: boolean;
+  isManualOffline: boolean;
+  toggleOffline: () => void;
   connectionType: string;
   isSyncing: boolean;
   pendingCount: number;
@@ -17,6 +19,8 @@ interface NetworkContextType {
 
 const NetworkContext = createContext<NetworkContextType>({
   isOnline: true,
+  isManualOffline: false,
+  toggleOffline: () => {},
   connectionType: 'wifi',
   isSyncing: false,
   pendingCount: 0,
@@ -66,14 +70,19 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
 
+  const [isManualOffline, setIsManualOffline] = useState<boolean>(false);
   const [hardwareConnected, setHardwareConnected] = useState<boolean>(true);
   const [hardwareReachable, setHardwareReachable] = useState<boolean | null>(true);
   const [connectionType, setConnectionType] = useState<string>('wifi');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [pendingCount, setPendingCount] = useState<number>(0);
 
-  // Effective real online status
-  const isOnline = hardwareConnected && (hardwareReachable ?? true);
+  const toggleOffline = useCallback(() => {
+    setIsManualOffline((prev) => !prev);
+  }, []);
+
+  // Effective real online status: only online if hardware is connected AND not manually simulated offline
+  const isOnline = !isManualOffline && hardwareConnected && (hardwareReachable ?? true);
 
   // Track previous online state to trigger auto-sync on reconnection
   const wasOnlineRef = useRef<boolean>(true);
@@ -238,6 +247,8 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <NetworkContext.Provider
       value={{
         isOnline,
+        isManualOffline,
+        toggleOffline,
         connectionType,
         isSyncing,
         pendingCount,

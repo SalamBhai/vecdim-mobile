@@ -167,6 +167,42 @@ export const LoginScreen: React.FC = () => {
               </>
             )}
           </Pressable>
+
+          {/* Quick 1-Tap Field Personas */}
+          <View className="mt-4 pt-4 border-t border-slate-100">
+            <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">
+              Quick 1-Tap Sentinel Personas
+            </Text>
+            <View className="flex-row flex-wrap gap-2 justify-center">
+              <Pressable
+                onPress={() => {
+                  setUsername('u_field_03');
+                  login('u_field_03');
+                }}
+                className="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 active:bg-emerald-100"
+              >
+                <Text className="text-[11px] font-bold text-emerald-800">Tega Babalola (Osun)</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setUsername('u_field_01');
+                  login('u_field_01');
+                }}
+                className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 active:bg-slate-200"
+              >
+                <Text className="text-[11px] font-bold text-slate-700">Biodun Adeleke (Lagos)</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setUsername('u_field_02');
+                  login('u_field_02');
+                }}
+                className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 active:bg-slate-200"
+              >
+                <Text className="text-[11px] font-bold text-slate-700">Aminu Bello (Kano)</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
 
         {/* Institutional Footer */}
