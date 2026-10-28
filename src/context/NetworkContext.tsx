@@ -18,8 +18,8 @@ interface NetworkContextType {
 }
 
 const NetworkContext = createContext<NetworkContextType>({
-  isOnline: true,
-  isManualOffline: false,
+  isOnline: false,
+  isManualOffline: true,
   toggleOffline: () => {},
   connectionType: 'wifi',
   isSyncing: false,
@@ -70,7 +70,7 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const [isManualOffline, setIsManualOffline] = useState<boolean>(false);
+  const [isManualOffline, setIsManualOffline] = useState<boolean>(true);
   const [hardwareConnected, setHardwareConnected] = useState<boolean>(true);
   const [hardwareReachable, setHardwareReachable] = useState<boolean | null>(true);
   const [connectionType, setConnectionType] = useState<string>('wifi');
@@ -85,7 +85,7 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const isOnline = !isManualOffline && hardwareConnected && (hardwareReachable ?? true);
 
   // Track previous online state to trigger auto-sync on reconnection
-  const wasOnlineRef = useRef<boolean>(true);
+  const wasOnlineRef = useRef<boolean>(false);
 
   // 1. Refresh pending outbox counter
   const refreshPendingCount = useCallback(async (): Promise<number> => {
