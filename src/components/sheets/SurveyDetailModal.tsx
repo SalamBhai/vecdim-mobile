@@ -114,10 +114,12 @@ export const SurveyDetailModal: React.FC<SurveyDetailModalProps> = ({
                     isLocal ? 'text-amber-900' : 'text-emerald-900'
                   }`}
                 >
-                  {isLocal ? 'Staged in Local Outbox (SQLite)' : 'Synced to PostGIS Server'}
+                  {isLocal ? 'Saved Locally (Ready to Sync)' : 'Synced & Verified'}
                 </Text>
                 <Text className="text-[11px] text-slate-500 mt-0.5">
-                  ID: {record.id}
+                  {isLocal
+                    ? 'Stored on device • Syncs automatically when online'
+                    : 'Transmitted to National Malaria Surveillance System'}
                 </Text>
               </View>
             </View>

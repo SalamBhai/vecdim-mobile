@@ -90,7 +90,7 @@ export const OutboxSyncScreen: React.FC<{ onEditRecord?: (id: string) => void }>
     onError: (error: any) => {
       Alert.alert(
         'Sync Network Error',
-        error.message || 'Could not connect to Go backend API. Records remain safe in offline SQLite.'
+        error.message || 'Could not connect to national server. Records remain safe in offline storage.'
       );
     },
   });
@@ -274,7 +274,7 @@ export const OutboxSyncScreen: React.FC<{ onEditRecord?: (id: string) => void }>
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color="#0D9488" />
-            <Text className="text-[13px] text-slate-400 mt-2">Loading SQLite outbox...</Text>
+            <Text className="text-[13px] text-slate-400 mt-2">Loading outbox...</Text>
           </View>
         ) : (
           <FlatList

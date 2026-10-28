@@ -241,7 +241,7 @@ export const EntomologyFormScreen: React.FC<{ onNavigateToOutbox?: () => void }>
         ]
       );
     } catch (err: any) {
-      Alert.alert('Storage Error', err.message || 'Failed to save record to local SQLite.');
+      Alert.alert('Storage Error', err.message || 'Failed to save record to device storage.');
     } finally {
       setIsSubmitting(false);
     }

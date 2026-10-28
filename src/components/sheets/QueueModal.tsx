@@ -208,7 +208,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                     if (!isOnline) {
                       Alert.alert(
                         'Device Offline',
-                        'Device is currently offline. Records are safely stored in local SQLite storage and will automatically upload as soon as your connection is restored.'
+                        'Device is currently offline. Records are safely stored on your device and will automatically upload as soon as your connection is restored.'
                       );
                       return;
                     }
