@@ -72,6 +72,24 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const larvaePerDip = dipsCount > 0 ? (totalLarvae / dipsCount).toFixed(1) : '0.0';
+  const densityNum = parseFloat(larvaePerDip);
+
+  let densityBadgeBg = 'bg-emerald-50 border-emerald-200';
+  let densityBadgeText = 'text-emerald-800';
+  let densityRiskLabel = 'Low Risk';
+  let densityDotColor = 'bg-emerald-500';
+
+  if (densityNum >= 10.0) {
+    densityBadgeBg = 'bg-rose-50 border-rose-300';
+    densityBadgeText = 'text-rose-800';
+    densityRiskLabel = 'High Alert';
+    densityDotColor = 'bg-rose-500';
+  } else if (densityNum >= 2.0) {
+    densityBadgeBg = 'bg-amber-50 border-amber-300';
+    densityBadgeText = 'text-amber-900';
+    densityRiskLabel = 'Moderate';
+    densityDotColor = 'bg-amber-500';
+  }
 
   // Synchronize state/LGA defaults when currentUser changes or modal opens
   useEffect(() => {
@@ -418,9 +436,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
                   LARVAL SAMPLING & DENSITY
                 </Text>
-                <View className="flex-row items-center bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  <Text className="text-[10px] font-bold text-emerald-800">
-                    Density: {larvaePerDip} / dip
+                <View className={`flex-row items-center px-2 py-0.5 rounded-md border ${densityBadgeBg}`}>
+                  <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${densityDotColor}`} />
+                  <Text className={`text-[10px] font-bold ${densityBadgeText}`}>
+                    {larvaePerDip} / dip • {densityRiskLabel}
                   </Text>
                 </View>
               </View>
