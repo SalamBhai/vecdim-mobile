@@ -43,9 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const user = getDemoUserById(storedId);
             setCurrentUser(user);
           } else {
-            // Default to Senior Field Entomologist Tega Babalola for instant demo readiness
-            const defaultOfficer = getDemoUserById('u_field_03');
-            setCurrentUser(defaultOfficer);
+            setCurrentUser(null);
           }
         }
       } catch (e) {
