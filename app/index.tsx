@@ -330,44 +330,54 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           </View>
 
           {/* Staged pending local scans first */}
-          {pendingLocalRecords.map((item) => (
-            <Pressable
-              key={`local-${item.id}`}
-              onPress={() => setActiveModal('queue')}
-              className="bg-amber-50/70 p-3 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-amber-100/60"
-            >
-              <View className="flex-row items-center flex-1 mr-2">
-                <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3 shadow-xs">
-                  <Clock size={18} color="#D97706" />
-                </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center">
-                    <Text className="font-bold text-[13px] text-slate-900 leading-tight mr-1.5">
-                      {item.lga} • {item.ward}
-                    </Text>
-                    <View className="px-1.5 py-0.5 rounded-full bg-amber-200">
-                      <Text className="text-[8.5px] font-black text-amber-900 uppercase">
-                        Pending Sync
-                      </Text>
-                    </View>
+          {pendingLocalRecords.map((item) => {
+            const isPending = item.who_class?.toLowerCase().includes('pending');
+            return (
+              <Pressable
+                key={`local-${item.id}`}
+                onPress={() => setActiveModal('queue')}
+                className="bg-amber-50/70 p-3 rounded-2xl border border-amber-300 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-amber-100/60"
+              >
+                <View className="flex-row items-center flex-1 mr-2">
+                  <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mr-3 shadow-xs">
+                    <Clock size={18} color="#D97706" />
                   </View>
-                  <View className="flex-row items-center mt-1">
-                    <Text className="text-[10px] text-slate-500 mr-2">
-                      {item.species} • {item.larval_density} /dip
-                    </Text>
-                    <View className="px-2 py-0.5 rounded-full bg-white border border-amber-300">
-                      <Text className="text-[9px] font-bold text-amber-800">
-                        {item.who_class}
+                  <View className="flex-1">
+                    <View className="flex-row items-center">
+                      <Text className="font-bold text-[13px] text-slate-900 leading-tight mr-1.5">
+                        {item.lga} • {item.ward}
                       </Text>
+                      <View className="px-1.5 py-0.5 rounded-full bg-amber-200">
+                        <Text className="text-[8.5px] font-black text-amber-900 uppercase">
+                          Pending Sync
+                        </Text>
+                      </View>
                     </View>
+                    <Text className="text-[10.5px] text-slate-500 mt-1">
+                      {item.species} • {item.larval_density ?? '0.0'} /dip
+                    </Text>
                   </View>
                 </View>
-              </View>
-              <Text className="text-[13px] font-extrabold text-amber-900">
-                {item.mortality_pct}% <Text className="text-[10px] text-slate-400 font-normal">mort.</Text>
-              </Text>
-            </Pressable>
-          ))}
+
+                {isPending ? (
+                  <View className="px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300">
+                    <Text className="text-[9px] font-bold text-amber-800">
+                      Bioassay Pending
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="items-end">
+                    <Text className="text-[13px] font-extrabold text-amber-900">
+                      {item.mortality_pct}% <Text className="text-[10px] text-slate-400 font-normal">mort.</Text>
+                    </Text>
+                    <Text className="text-[9px] font-bold text-amber-800">
+                      {item.who_class}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
 
           {/* Real surveys retrieved from Go Backend database for this officer */}
           {serverRecords.map((item) => (
