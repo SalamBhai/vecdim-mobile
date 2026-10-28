@@ -18,6 +18,7 @@ import {
   Clock,
   FlaskConical,
   Bug,
+  Lock,
 } from 'lucide-react-native';
 import { GPSAccuracyMeter, GPSLocationData } from '../GPSAccuracyMeter';
 import { WHOMortalityBadge } from '../WHOMortalityBadge';
@@ -81,6 +82,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
   // Active form section tab: 1. Larval (Field) vs 2. Bioassay (Lab)
   const [activeTab, setActiveTab] = useState<'larval' | 'bioassay'>('larval');
+  const [isLarvalLocked, setIsLarvalLocked] = useState<boolean>(false);
 
   const [selectedState, setSelectedState] = useState<string>(userInitialState);
   const [selectedLga, setSelectedLga] = useState<string>(userInitialLga);
@@ -395,8 +397,9 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     LGA ({selectedState.toUpperCase()})
                   </Text>
                   <Pressable
-                    onPress={() => setShowLgaPicker(!showLgaPicker)}
-                    className="border border-slate-200 rounded-2xl px-3.5 py-3 bg-white flex-row items-center justify-between shadow-xs active:bg-slate-50"
+                    onPress={() => !isLarvalLocked && setShowLgaPicker(!showLgaPicker)}
+                    disabled={isLarvalLocked}
+                    className={`border border-slate-200 rounded-2xl px-3.5 py-3 flex-row items-center justify-between shadow-xs ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-white active:bg-slate-50'}`}
                   >
                     <Text className="text-[13px] font-semibold text-slate-800" numberOfLines={1}>
                       {selectedLga}
@@ -413,7 +416,8 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                   <TextInput
                     value={ward}
                     onChangeText={setWard}
-                    className="border border-slate-200 rounded-2xl px-3.5 py-2.5 bg-white text-[13px] font-semibold text-slate-800"
+                    editable={!isLarvalLocked}
+                    className={`border border-slate-200 rounded-2xl px-3.5 py-2.5 text-[13px] font-semibold text-slate-800 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-white'}`}
                     placeholder="e.g. Ward 04 (Oja-Oba)"
                     placeholderTextColor="#94A3B8"
                   />
@@ -457,10 +461,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 </Text>
                 <View className="flex-row gap-2 mb-2">
                   <Pressable
-                    onPress={() => setHabitatType(HABITAT_TYPES[0])}
+                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[0])}
+                    disabled={isLarvalLocked}
                     className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                       habitatType === HABITAT_TYPES[0]
                         ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                        : isLarvalLocked
+                        ? 'bg-slate-50 border-slate-200 opacity-40'
                         : 'bg-white border-slate-200'
                     }`}
                   >
@@ -476,10 +483,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                   </Pressable>
 
                   <Pressable
-                    onPress={() => setHabitatType(HABITAT_TYPES[1])}
+                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[1])}
+                    disabled={isLarvalLocked}
                     className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                       habitatType === HABITAT_TYPES[1]
                         ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                        : isLarvalLocked
+                        ? 'bg-slate-50 border-slate-200 opacity-40'
                         : 'bg-white border-slate-200'
                     }`}
                   >
@@ -497,10 +507,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
                 <View className="flex-row gap-2">
                   <Pressable
-                    onPress={() => setHabitatType(HABITAT_TYPES[2])}
+                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[2])}
+                    disabled={isLarvalLocked}
                     className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                       habitatType === HABITAT_TYPES[2]
                         ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                        : isLarvalLocked
+                        ? 'bg-slate-50 border-slate-200 opacity-40'
                         : 'bg-white border-slate-200'
                     }`}
                   >
@@ -516,10 +529,13 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                   </Pressable>
 
                   <Pressable
-                    onPress={() => setHabitatType(HABITAT_TYPES[3])}
+                    onPress={() => !isLarvalLocked && setHabitatType(HABITAT_TYPES[3])}
+                    disabled={isLarvalLocked}
                     className={`flex-1 py-2.5 px-3 rounded-2xl border items-center justify-center ${
                       habitatType === HABITAT_TYPES[3]
                         ? 'bg-emerald-50/90 border-emerald-500 shadow-xs'
+                        : isLarvalLocked
+                        ? 'bg-slate-50 border-slate-200 opacity-40'
                         : 'bg-white border-slate-200'
                     }`}
                   >
@@ -539,9 +555,22 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               {/* 3. Larval Sampling & Density Card (Both Dips AND Larvae) */}
               <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
-                    LARVAL SAMPLING & DENSITY
-                  </Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage mr-2">
+                      LARVAL SAMPLING & DENSITY
+                    </Text>
+                    {isLarvalLocked && (
+                      <Pressable
+                        onPress={() => setIsLarvalLocked(false)}
+                        className="flex-row items-center bg-slate-200/80 px-2 py-0.5 rounded-full active:bg-slate-300"
+                      >
+                        <Lock size={10} color="#475569" />
+                        <Text className="text-[9px] font-bold text-slate-600 ml-1">
+                          Locked (Tap to Edit)
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
                   <View className={`flex-row items-center px-2 py-0.5 rounded-md border ${densityBadgeBg}`}>
                     <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${densityDotColor}`} />
                     <Text className={`text-[10px] font-bold ${densityBadgeText}`}>
@@ -558,24 +587,28 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={() => setDipsCount(Math.max(1, dipsCount - 1))}
-                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        onPress={() => !isLarvalLocked && setDipsCount(Math.max(1, dipsCount - 1))}
+                        disabled={isLarvalLocked}
+                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
                       >
                         <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(dipsCount)}
                         onChangeText={(t) => {
+                          if (isLarvalLocked) return;
                           const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
                           setDipsCount(isNaN(val) ? 1 : Math.max(1, val));
                         }}
+                        editable={!isLarvalLocked}
                         keyboardType="number-pad"
-                        selectTextOnFocus={true}
-                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
+                        selectTextOnFocus={!isLarvalLocked}
+                        className={`text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 rounded-lg border border-slate-200 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-slate-50/80'}`}
                       />
                       <Pressable
-                        onPress={() => setDipsCount(dipsCount + 1)}
-                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        onPress={() => !isLarvalLocked && setDipsCount(dipsCount + 1)}
+                        disabled={isLarvalLocked}
+                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
                       >
                         <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
@@ -589,24 +622,28 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 1))}
-                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        onPress={() => !isLarvalLocked && setTotalLarvae(Math.max(0, totalLarvae - 1))}
+                        disabled={isLarvalLocked}
+                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
                       >
                         <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(totalLarvae)}
                         onChangeText={(t) => {
+                          if (isLarvalLocked) return;
                           const val = parseInt(t.replace(/[^0-9]/g, ''), 10);
                           setTotalLarvae(isNaN(val) ? 0 : Math.max(0, val));
                         }}
+                        editable={!isLarvalLocked}
                         keyboardType="number-pad"
-                        selectTextOnFocus={true}
-                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
+                        selectTextOnFocus={!isLarvalLocked}
+                        className={`text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 rounded-lg border border-slate-200 ${isLarvalLocked ? 'bg-slate-100 opacity-60' : 'bg-slate-50/80'}`}
                       />
                       <Pressable
-                        onPress={() => setTotalLarvae(totalLarvae + 1)}
-                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
+                        onPress={() => !isLarvalLocked && setTotalLarvae(totalLarvae + 1)}
+                        disabled={isLarvalLocked}
+                        className={`w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80 ${isLarvalLocked ? 'opacity-30' : ''}`}
                       >
                         <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
@@ -651,7 +688,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 </Pressable>
 
                 <Pressable
-                  onPress={() => setActiveTab('bioassay')}
+                  onPress={() => {
+                    setIsLarvalLocked(true);
+                    setActiveTab('bioassay');
+                  }}
                   className="py-3.5 rounded-2xl bg-white border border-slate-300 active:bg-slate-50 items-center justify-center flex-row shadow-xs"
                 >
                   <Text className="text-slate-800 font-bold text-[13.5px] mr-2 font-bricolage">
