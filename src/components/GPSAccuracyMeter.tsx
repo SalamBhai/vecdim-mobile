@@ -20,6 +20,7 @@ interface GPSAccuracyMeterProps {
   initialLat?: number;
   initialLon?: number;
   initialAccuracy?: number;
+  disabled?: boolean;
 }
 
 export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
@@ -29,6 +30,7 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
   initialLat,
   initialLon,
   initialAccuracy,
+  disabled,
 }) => {
   const [latitude, setLatitude] = useState<number | null>(initialLat || null);
   const [longitude, setLongitude] = useState<number | null>(initialLon || null);
@@ -170,26 +172,32 @@ export const GPSAccuracyMeter: React.FC<GPSAccuracyMeterProps> = ({
         <Text className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
           GPS Coordinates & Accuracy
         </Text>
-        <View className="flex-row items-center">
-          <Pressable
-            onPress={setDemoGPS}
-            className="mr-1.5 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 active:bg-emerald-100"
-          >
-            <Text className="text-[10.5px] font-bold text-emerald-800 font-bricolage">Demo Fix</Text>
-          </Pressable>
+        {!disabled ? (
+          <View className="flex-row items-center">
+            <Pressable
+              onPress={setDemoGPS}
+              className="mr-1.5 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 active:bg-emerald-100"
+            >
+              <Text className="text-[10.5px] font-bold text-emerald-800 font-bricolage">Demo Fix</Text>
+            </Pressable>
 
-          <Pressable
-            onPress={fetchGPS}
-            disabled={loading}
-            className="flex-row items-center bg-white px-2.5 py-1 rounded-lg border border-slate-200 active:bg-slate-100 shadow-xs"
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#059669" />
-            ) : (
-              <Text className="text-[11px] font-semibold text-slate-700 font-bricolage">Refresh</Text>
-            )}
-          </Pressable>
-        </View>
+            <Pressable
+              onPress={fetchGPS}
+              disabled={loading}
+              className="flex-row items-center bg-white px-2.5 py-1 rounded-lg border border-slate-200 active:bg-slate-100 shadow-xs"
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#059669" />
+              ) : (
+                <Text className="text-[11px] font-semibold text-slate-700 font-bricolage">Refresh</Text>
+              )}
+            </Pressable>
+          </View>
+        ) : (
+          <View className="flex-row items-center bg-slate-200/80 px-2 py-0.5 rounded-full">
+            <Text className="text-[9.5px] font-bold text-slate-500">Locked</Text>
+          </View>
+        )}
       </View>
 
       {/* Lat/Lon readings */}

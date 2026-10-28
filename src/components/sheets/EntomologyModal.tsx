@@ -316,7 +316,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
             </Pressable>
 
             <Pressable
-              onPress={() => setActiveTab('bioassay')}
+              onPress={() => {
+                setIsLarvalLocked(true);
+                setActiveTab('bioassay');
+              }}
               className={`flex-1 py-2 rounded-lg items-center justify-center ${
                 activeTab === 'bioassay' ? 'bg-white shadow-xs' : ''
               }`}
@@ -567,15 +570,12 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                       LARVAL SAMPLING & DENSITY
                     </Text>
                     {isLarvalLocked && (
-                      <Pressable
-                        onPress={() => setIsLarvalLocked(false)}
-                        className="flex-row items-center bg-slate-200/80 px-2 py-0.5 rounded-full active:bg-slate-300"
-                      >
+                      <View className="flex-row items-center bg-slate-200/90 px-2 py-0.5 rounded-full">
                         <Lock size={10} color="#475569" />
                         <Text className="text-[9px] font-bold text-slate-600 ml-1">
-                          Locked (Tap to Edit)
+                          Read-Only (Day 1)
                         </Text>
-                      </Pressable>
+                      </View>
                     )}
                   </View>
                   <View className={`flex-row items-center px-2 py-0.5 rounded-md border ${densityBadgeBg}`}>
@@ -667,45 +667,59 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 initialLon={gpsData.longitude || currentUser?.defaultLon || 4.5418}
                 initialAccuracy={gpsData.accuracy || 5.8}
                 onLocationChange={handleLocationChange}
+                disabled={isLarvalLocked}
               />
 
-              {/* Action Buttons: Save Larval Survey (Primary) OR Next: WHO Bioassay (Secondary) */}
+              {/* Action Buttons: Save Larval Survey OR Continue WHO Bioassay */}
               <View className="mt-4 mb-2">
-                <Pressable
-                  onPress={() => handleSubmit(false)}
-                  disabled={isSubmitting || gpsData.isBlocked}
-                  className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mb-3 ${
-                    gpsData.isBlocked
-                      ? 'bg-slate-300'
-                      : isOnline
-                      ? 'bg-emerald-600 active:bg-emerald-700'
-                      : 'bg-amber-600 active:bg-amber-700'
-                  }`}
-                >
-                  {isOnline ? (
-                    <CheckCircle2 size={16} color="#FFFFFF" />
-                  ) : (
-                    <CloudOff size={16} color="#FFFFFF" />
-                  )}
-                  <Text className="text-white font-bold text-[14px] ml-2 font-bricolage">
-                    {isSubmitting
-                      ? 'Saving Record...'
-                      : 'Save Larval Survey (Bioassay Pending)'}
-                  </Text>
-                </Pressable>
+                {isLarvalLocked ? (
+                  <Pressable
+                    onPress={() => setActiveTab('bioassay')}
+                    className="py-3.5 rounded-2xl bg-emerald-600 active:bg-emerald-700 items-center justify-center flex-row shadow-md mb-3"
+                  >
+                    <Text className="text-white font-bold text-[14px] mr-2 font-bricolage">
+                      Continue WHO Bioassay →
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <>
+                    <Pressable
+                      onPress={() => handleSubmit(false)}
+                      disabled={isSubmitting || gpsData.isBlocked}
+                      className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mb-3 ${
+                        gpsData.isBlocked
+                          ? 'bg-slate-300'
+                          : isOnline
+                          ? 'bg-emerald-600 active:bg-emerald-700'
+                          : 'bg-amber-600 active:bg-amber-700'
+                      }`}
+                    >
+                      {isOnline ? (
+                        <CheckCircle2 size={16} color="#FFFFFF" />
+                      ) : (
+                        <CloudOff size={16} color="#FFFFFF" />
+                      )}
+                      <Text className="text-white font-bold text-[14px] ml-2 font-bricolage">
+                        {isSubmitting
+                          ? 'Saving Record...'
+                          : 'Save Larval Survey (Bioassay Pending)'}
+                      </Text>
+                    </Pressable>
 
-                <Pressable
-                  onPress={() => {
-                    setIsLarvalLocked(true);
-                    setActiveTab('bioassay');
-                  }}
-                  className="py-3.5 rounded-2xl bg-white border border-slate-300 active:bg-slate-50 items-center justify-center flex-row shadow-xs"
-                >
-                  <Text className="text-slate-800 font-bold text-[13.5px] mr-2 font-bricolage">
-                    Next: WHO Bioassay
-                  </Text>
-                  <ArrowRight size={15} color="#1E293B" />
-                </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setIsLarvalLocked(true);
+                        setActiveTab('bioassay');
+                      }}
+                      className="py-3.5 rounded-2xl bg-white border border-slate-300 active:bg-slate-50 items-center justify-center flex-row shadow-xs"
+                    >
+                      <Text className="text-slate-800 font-bold text-[13.5px] mr-2 font-bricolage">
+                        Next: WHO Bioassay
+                      </Text>
+                      <ArrowRight size={15} color="#1E293B" />
+                    </Pressable>
+                  </>
+                )}
               </View>
             </ScrollView>
           ) : (
@@ -719,60 +733,24 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               nestedScrollEnabled={true}
               bounces={true}
             >
-              {/* Locked Field Sampling Data (Read-Only on Tab 2) */}
+              {/* Sample Linkage Card */}
               <View className="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/90 mb-3.5 shadow-xs">
-                <View className="flex-row items-center justify-between pb-2 mb-2 border-b border-slate-200">
-                  <View className="flex-row items-center">
-                    <Lock size={12} color="#059669" />
-                    <Text className="text-[10px] font-bold text-slate-700 uppercase tracking-wider ml-1.5 font-bricolage">
-                      FIELD LARVAL SAMPLE (READ-ONLY)
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider font-bricolage">
+                      LINKED FIELD SAMPLE
                     </Text>
-                  </View>
-                  <View className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-200">
-                    <Text className="text-[9.5px] font-bold text-emerald-800 font-mono">
+                    <Text className="text-[13px] font-mono font-black text-slate-900 mt-0.5">
                       {bottleLabelId}
                     </Text>
                   </View>
-                </View>
-
-                <View className="flex-row justify-between mb-1.5">
-                  <View className="flex-1 mr-2">
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      Location & Ward
-                    </Text>
-                    <Text className="text-[12px] font-bold text-slate-800" numberOfLines={1}>
-                      {selectedLga} • {ward}
-                    </Text>
-                  </View>
                   <View className="items-end">
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      Habitat
+                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider font-bricolage">
+                      SITE
                     </Text>
-                    <Text className="text-[12px] font-bold text-slate-700">
-                      {habitatType}
+                    <Text className="text-[11px] font-bold text-slate-700 mt-0.5">
+                      {selectedLga} • {ward.split(' ')[0] || 'Ward'}
                     </Text>
-                  </View>
-                </View>
-
-                <View className="flex-row justify-between pt-1.5 border-t border-slate-200/60 items-center">
-                  <View>
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      Collection Count
-                    </Text>
-                    <Text className="text-[11.5px] font-mono font-bold text-slate-800">
-                      {dipsCount} dips • {totalLarvae} larvae
-                    </Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-                      Larval Density
-                    </Text>
-                    <View className="flex-row items-center">
-                      <View className={`w-1.5 h-1.5 rounded-full mr-1 ${densityDotColor}`} />
-                      <Text className="text-[11.5px] font-mono font-bold text-slate-900">
-                        {larvaePerDip} / dip
-                      </Text>
-                    </View>
                   </View>
                 </View>
               </View>
