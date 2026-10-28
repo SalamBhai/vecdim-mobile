@@ -104,9 +104,6 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                   </Text>
                 </View>
               </View>
-              <Text className="text-[11.5px] text-slate-400 font-medium mt-0.5">
-                SQLite WAL • Auto-syncs on reconnection
-              </Text>
             </View>
             <Pressable
               onPress={onClose}
@@ -156,7 +153,7 @@ export const QueueModal: React.FC<QueueModalProps> = ({ visible, onClose, record
                   Offline queue is empty
                 </Text>
                 <Text className="text-[12px] text-slate-400 mt-1 text-center max-w-[280px]">
-                  All surveys captured in the field are committed immediately to local SQLite WAL storage and synced when connected.
+                  All surveys captured in the field are stored safely offline and uploaded when connected.
                 </Text>
               </View>
             ) : (
