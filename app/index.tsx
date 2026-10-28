@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -77,6 +77,19 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   >(null);
   const [viewingDetailRecord, setViewingDetailRecord] = useState<any | null>(null);
   const [editingPendingRecord, setEditingPendingRecord] = useState<LocalFieldRecord | null>(null);
+
+  // Reusable callback to start a fresh Form E-1 survey (shared by Quick Action, Center Scan, and empty states)
+  const handleOpenNewSurvey = useCallback(() => {
+    setEditingPendingRecord(null);
+    setActiveModal('entomology');
+  }, []);
+
+  // Reusable callback to resume an existing pending survey for Day 7 WHO Bioassay
+  const handleResumeBioassay = useCallback((record: LocalFieldRecord | any) => {
+    setViewingDetailRecord(null);
+    setEditingPendingRecord(record as LocalFieldRecord);
+    setActiveModal('entomology');
+  }, []);
 
   // Non-blocking auto-dismissing toast notification
   const [toastMessage, setToastMessage] = useState<{
@@ -240,10 +253,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         <View className="flex-row mb-4 gap-2">
           {/* Action 1: Malaria */}
           <Pressable
-            onPress={() => {
-              setEditingPendingRecord(null);
-              setActiveModal('entomology');
-            }}
+            onPress={handleOpenNewSurvey}
             className="flex-1 bg-white rounded-2xl py-3 px-1 border border-slate-100 items-center justify-center shadow-xs active:bg-slate-50"
           >
             <View className="w-10 h-10 rounded-xl bg-emerald-50 items-center justify-center mb-1.5">
@@ -307,7 +317,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
         </View>
 
         {/* 3. Active Transect Route Map (Dynamically displays active jurisdiction landmarks) */}
-        <TransectRouteMap onPressDetails={() => setActiveModal('entomology')} />
+        <TransectRouteMap onPressDetails={handleOpenNewSurvey} />
 
         {/* 4. Officer Surveys Feed: Retrieved specifically for this officer */}
         <View className="mb-2">
@@ -343,8 +353,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 key={`local-${item.id}`}
                 onPress={() => {
                   if (isPendingBioassay) {
-                    setEditingPendingRecord(item);
-                    setActiveModal('entomology');
+                    handleResumeBioassay(item);
                   } else {
                     setViewingDetailRecord({ ...item, source: 'local' });
                   }
@@ -428,10 +437,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
                 Your {currentUser.state} sentinel grid is active. Tap below to capture your first NMEP Form E-1 survey.
               </Text>
               <Pressable
-                onPress={() => {
-                  setEditingPendingRecord(null);
-                  setActiveModal('entomology');
-                }}
+                onPress={handleOpenNewSurvey}
                 className="mt-3.5 px-4 py-2.5 rounded-xl bg-emerald-600 flex-row items-center shadow-xs active:bg-emerald-700"
               >
                 <Plus size={15} color="#FFFFFF" />
@@ -451,16 +457,10 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             pendingLocalRecords={pendingLocalRecords}
             loadingServer={loadingServer}
             onRefresh={handleRefreshAll}
-            onOpenCapture={() => {
-              setEditingPendingRecord(null);
-              setActiveModal('entomology');
-            }}
+            onOpenCapture={handleOpenNewSurvey}
             onOpenQueue={() => setActiveModal('queue')}
             onOpenAlerts={() => setActiveModal('alerts')}
-            onCompleteBioassay={(rec) => {
-              setEditingPendingRecord(rec as LocalFieldRecord);
-              setActiveModal('entomology');
-            }}
+            onCompleteBioassay={handleResumeBioassay}
           />
         )}
       </SafeAreaView>
@@ -513,10 +513,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           {/* Elevated Floating Center Scan / Capture Button */}
           <View className="items-center justify-center flex-1">
             <Pressable
-              onPress={() => {
-                setEditingPendingRecord(null);
-                setActiveModal('entomology');
-              }}
+              onPress={handleOpenNewSurvey}
               className="w-13 h-13 rounded-2xl bg-slate-950 items-center justify-center shadow-xl shadow-slate-950/40 active:scale-95 -mt-6 border-4 border-white"
               style={{ width: 54, height: 54 }}
             >
@@ -574,11 +571,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           setViewingDetailRecord(null);
           setActiveModal('queue');
         }}
-        onCompleteBioassay={(rec) => {
-          setViewingDetailRecord(null);
-          setEditingPendingRecord(rec as LocalFieldRecord);
-          setActiveModal('entomology');
-        }}
+        onCompleteBioassay={handleResumeBioassay}
       />
 
       <QueueModal
