@@ -326,7 +326,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
             <ScrollView
               className="flex-1"
               showsVerticalScrollIndicator={true}
-              contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
+              contentContainerStyle={{ paddingBottom: 70, paddingTop: 4 }}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
               bounces={true}
@@ -619,37 +619,39 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 onLocationChange={handleLocationChange}
               />
 
-              {/* Action Buttons: Next to Bioassay OR Save Larval Survey Now */}
-              <View className="space-y-2.5 mt-2">
-                <Pressable
-                  onPress={() => setActiveTab('bioassay')}
-                  className="py-3.5 rounded-2xl bg-slate-900 active:bg-slate-800 items-center justify-center flex-row shadow-md"
-                >
-                  <Text className="text-white font-bold text-[14px] mr-2 font-bricolage">
-                    Next: WHO Bioassay
-                  </Text>
-                  <ArrowRight size={16} color="#FFFFFF" />
-                </Pressable>
-
+              {/* Action Buttons: Save Larval Survey (Primary) OR Next: WHO Bioassay (Secondary) */}
+              <View className="mt-4 mb-2">
                 <Pressable
                   onPress={() => handleSubmit(false)}
                   disabled={isSubmitting || gpsData.isBlocked}
-                  className={`py-3 rounded-2xl items-center justify-center flex-row border ${
+                  className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mb-3 ${
                     gpsData.isBlocked
-                      ? 'bg-slate-200 border-slate-300'
+                      ? 'bg-slate-300'
                       : isOnline
-                      ? 'bg-emerald-50 border-emerald-300 active:bg-emerald-100'
-                      : 'bg-amber-50 border-amber-300 active:bg-amber-100'
+                      ? 'bg-emerald-600 active:bg-emerald-700'
+                      : 'bg-amber-600 active:bg-amber-700'
                   }`}
                 >
-                  <Clock size={15} color={isOnline ? '#065F46' : '#92400E'} />
-                  <Text
-                    className={`font-bold text-[13px] ml-2 font-bricolage ${
-                      isOnline ? 'text-emerald-900' : 'text-amber-900'
-                    }`}
-                  >
-                    Save Larval Survey (Bioassay Pending)
+                  {isOnline ? (
+                    <CheckCircle2 size={16} color="#FFFFFF" />
+                  ) : (
+                    <CloudOff size={16} color="#FFFFFF" />
+                  )}
+                  <Text className="text-white font-bold text-[14px] ml-2 font-bricolage">
+                    {isSubmitting
+                      ? 'Saving Record...'
+                      : 'Save Larval Survey (Bioassay Pending)'}
                   </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setActiveTab('bioassay')}
+                  className="py-3.5 rounded-2xl bg-white border border-slate-300 active:bg-slate-50 items-center justify-center flex-row shadow-xs"
+                >
+                  <Text className="text-slate-800 font-bold text-[13.5px] mr-2 font-bricolage">
+                    Next: WHO Bioassay
+                  </Text>
+                  <ArrowRight size={15} color="#1E293B" />
                 </Pressable>
               </View>
             </ScrollView>
@@ -658,7 +660,7 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
             <ScrollView
               className="flex-1"
               showsVerticalScrollIndicator={true}
-              contentContainerStyle={{ paddingBottom: 40, paddingTop: 4 }}
+              contentContainerStyle={{ paddingBottom: 70, paddingTop: 4 }}
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled={true}
               bounces={true}
@@ -865,11 +867,11 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
               </View>
 
               {/* Action Buttons: Save Complete Survey OR Back */}
-              <View className="space-y-2.5 mt-2">
+              <View className="mt-4 mb-2">
                 <Pressable
                   onPress={() => handleSubmit(bioassayStatus === 'completed')}
                   disabled={isSubmitting || gpsData.isBlocked}
-                  className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md ${
+                  className={`py-3.5 rounded-2xl items-center justify-center flex-row shadow-md mb-3 ${
                     gpsData.isBlocked
                       ? 'bg-slate-300'
                       : isOnline
@@ -893,10 +895,10 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
 
                 <Pressable
                   onPress={() => setActiveTab('larval')}
-                  className="py-2.5 rounded-xl items-center justify-center flex-row"
+                  className="py-3.5 rounded-2xl bg-white border border-slate-200 active:bg-slate-50 items-center justify-center flex-row shadow-xs"
                 >
-                  <ArrowLeft size={14} color="#64748B" />
-                  <Text className="font-bold text-[12.5px] ml-1.5 text-slate-600 font-bricolage">
+                  <ArrowLeft size={15} color="#475569" />
+                  <Text className="font-bold text-[13px] ml-1.5 text-slate-700 font-bricolage">
                     Back to Larval Sampling
                   </Text>
                 </Pressable>
