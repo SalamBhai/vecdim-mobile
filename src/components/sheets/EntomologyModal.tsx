@@ -549,15 +549,15 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 <View className="flex-row gap-2.5">
                   {/* Dips Taken */}
                   <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
                       DIPS TAKEN (N)
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
                         onPress={() => setDipsCount(Math.max(1, dipsCount - 1))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(dipsCount)}
@@ -566,28 +566,29 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                           setDipsCount(isNaN(val) ? 1 : Math.max(1, val));
                         }}
                         keyboardType="number-pad"
-                        className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                        selectTextOnFocus={true}
+                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
                       />
                       <Pressable
                         onPress={() => setDipsCount(dipsCount + 1)}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
                     </View>
                   </View>
 
                   {/* Total Larvae Count */}
                   <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
                       TOTAL LARVAE (N)
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 10))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        onPress={() => setTotalLarvae(Math.max(0, totalLarvae - 1))}
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(totalLarvae)}
@@ -596,13 +597,14 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                           setTotalLarvae(isNaN(val) ? 0 : Math.max(0, val));
                         }}
                         keyboardType="number-pad"
-                        className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                        selectTextOnFocus={true}
+                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
                       />
                       <Pressable
-                        onPress={() => setTotalLarvae(totalLarvae + 10)}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        onPress={() => setTotalLarvae(totalLarvae + 1)}
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
                     </View>
                   </View>
@@ -796,19 +798,19 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                 <View className="flex-row gap-2.5 mb-2">
                   {/* Exposed Mosquitoes */}
                   <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
                       EXPOSED (N)
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
                         onPress={() => {
-                          const next = Math.max(10, nExposed - 5);
+                          const next = Math.max(1, nExposed - 1);
                           setNExposed(next);
                           if (nDead > next) setNDead(next);
                         }}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(nExposed)}
@@ -819,28 +821,29 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                           if (nDead > nextExposed) setNDead(nextExposed);
                         }}
                         keyboardType="number-pad"
-                        className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                        selectTextOnFocus={true}
+                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
                       />
                       <Pressable
-                        onPress={() => setNExposed(nExposed + 5)}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        onPress={() => setNExposed(nExposed + 1)}
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
                     </View>
                   </View>
 
                   {/* Dead Mosquitoes */}
                   <View className="flex-1 bg-white p-2.5 rounded-xl border border-slate-200">
-                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1">
+                    <Text className="text-[9.5px] font-bold text-slate-500 uppercase mb-1.5">
                       DEAD (N)
                     </Text>
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={() => setNDead(Math.max(0, nDead - 5))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        onPress={() => setNDead(Math.max(0, nDead - 1))}
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">-</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">-</Text>
                       </Pressable>
                       <TextInput
                         value={String(nDead)}
@@ -850,13 +853,14 @@ export const EntomologyModal: React.FC<EntomologyModalProps> = ({
                           setNDead(nextDead);
                         }}
                         keyboardType="number-pad"
-                        className="text-[15px] font-mono font-black text-slate-900 text-center w-12 py-0"
+                        selectTextOnFocus={true}
+                        className="text-[15px] font-mono font-black text-slate-900 text-center flex-1 mx-1.5 py-1 bg-slate-50/80 border border-slate-200 rounded-lg"
                       />
                       <Pressable
-                        onPress={() => setNDead(Math.min(nExposed, nDead + 5))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200"
+                        onPress={() => setNDead(Math.min(nExposed, nDead + 1))}
+                        className="w-8 h-8 rounded-lg bg-slate-100 items-center justify-center active:bg-slate-200 border border-slate-200/80"
                       >
-                        <Text className="font-bold text-slate-700 text-[14px]">+</Text>
+                        <Text className="font-bold text-slate-700 text-[15px]">+</Text>
                       </Pressable>
                     </View>
                   </View>
