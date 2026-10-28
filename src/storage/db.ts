@@ -417,6 +417,42 @@ export async function deleteRecord(id: string): Promise<void> {
   await db.runAsync(`DELETE FROM records WHERE id = ?;`, [id]);
 }
 
+/**
+ * Caches records fetched from the server into local SQLite with 'synced' status.
+ * This guarantees that previously synced records remain visible and actionable when offline.
+ */
+export async function cacheServerRecords(serverRecords: any[], currentUserId?: string): Promise<void> {
+  if (!serverRecords || serverRecords.length === 0) return;
+  for (const s of serverRecords) {
+    const record: LocalFieldRecord = {
+      id: s.id,
+      user_id: s.user_id || currentUserId || 'u_field_03',
+      state: s.state,
+      lga: s.lga,
+      ward: s.ward,
+      collection_date: s.collection_date,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      gps_accuracy_m: s.gps_accuracy_m || 5.0,
+      species: s.species,
+      insecticide: s.insecticide,
+      n_exposed: s.n_exposed ?? 0,
+      n_dead: s.n_dead ?? 0,
+      mortality_pct: s.mortality_pct ?? 0,
+      who_class: s.who_class,
+      larval_density: s.larval_density ?? 0,
+      urban: Boolean(s.urban),
+      irs_covered: Boolean(s.irs_covered),
+      itn_use_pct: s.itn_use_pct ?? 65,
+      sync_status: 'synced',
+      server_error: null,
+      created_at: s.created_at || new Date().toISOString(),
+      updated_at: s.updated_at || new Date().toISOString(),
+    };
+    await saveFieldRecord(record);
+  }
+}
+
 function formatRecordFromRow(row: any): LocalFieldRecord {
   return {
     id: row.id,

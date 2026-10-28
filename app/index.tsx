@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -39,8 +39,8 @@ import { QueueModal } from '../src/components/sheets/QueueModal';
 import { AlertsModal } from '../src/components/sheets/AlertsModal';
 import { Dhis2Modal } from '../src/components/sheets/Dhis2Modal';
 import { AuthModal } from '../src/components/sheets/AuthModal';
-import { getAllRecords, LocalFieldRecord } from '../src/storage/db';
-import { fetchServerRecords, ServerRecord } from '../src/api/client';
+import { getAllRecords, LocalFieldRecord, cacheServerRecords } from '../src/storage/db';
+import { fetchServerRecords, ServerRecord, ServerRecordsResponse } from '../src/api/client';
 
 export default function MainAppScreen() {
   const { currentUser, isAuthenticated, isLoading } = useAuth();
@@ -148,26 +148,27 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   } = useQuery({
     queryKey: ['serverRecords', currentUser.id],
     queryFn: async () => {
-      if (!isOnline) {
-        return { count: 0, records: [] };
-      }
       try {
+        let res: ServerRecordsResponse;
         // National Director has nationwide oversight: fetch all records across Osun, Lagos, Kano
         if (currentUser.role === 'uniosun' || currentUser.state === 'National') {
-          return await fetchServerRecords(currentUser.id);
+          res = await fetchServerRecords(currentUser.id);
+        } else if (currentUser.role === 'vecdim') {
+          res = await fetchServerRecords(currentUser.id, currentUser.state);
+        } else {
+          res = await fetchServerRecords(currentUser.id, currentUser.state);
         }
-        // State Coordinator fetches all records in their state
-        if (currentUser.role === 'vecdim') {
-          return await fetchServerRecords(currentUser.id, currentUser.state);
+        if (res?.records && res.records.length > 0) {
+          cacheServerRecords(res.records, currentUser.id).catch(console.error);
         }
-        // Field officer fetches their records across any surveyed LGA
-        return await fetchServerRecords(currentUser.id, currentUser.state);
+        return res;
       } catch {
-        return { count: 0, records: [] };
+        return null;
       }
     },
-    enabled: !!currentUser.id,
-    refetchInterval: 3000,
+    enabled: !!currentUser.id && isOnline,
+    placeholderData: (previousData) => previousData,
+    refetchInterval: isOnline ? 3000 : false,
   });
 
   // Load local offline records scoped to this authenticated officer
@@ -188,7 +189,27 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
   };
 
   const pendingLocalRecords = localRecords.filter((r) => r.sync_status === 'pending_sync');
-  const serverRecords: ServerRecord[] = serverData?.records || [];
+  const localSyncedRecords = localRecords.filter((r) => r.sync_status === 'synced');
+
+  // Unified synced records: preserves all surveys offline from SQLite cache + overlays live server records
+  const unifiedSyncedRecords = useMemo(() => {
+    const map = new Map<string, any>();
+    // 1. Seed with local SQLite synced records (available offline)
+    for (const r of localSyncedRecords) {
+      map.set(r.id, r);
+    }
+    // 2. Overlay live server records if online
+    if (serverData?.records) {
+      for (const r of serverData.records) {
+        map.set(r.id, r);
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => {
+      const dateA = a.created_at || a.collection_date || '';
+      const dateB = b.created_at || b.collection_date || '';
+      return dateB.localeCompare(dateA);
+    });
+  }, [localSyncedRecords, serverData?.records]);
 
   // Automatically flush outbox whenever the device is online and pending items exist
   useEffect(() => {
@@ -353,7 +374,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           <View className="flex-row items-center justify-between mb-2.5">
             <View className="flex-row items-center">
               <Text className="text-[14px] font-bold text-slate-900 tracking-tight">
-                Surveys Collected ({serverRecords.length + pendingLocalRecords.length})
+                Surveys Collected ({unifiedSyncedRecords.length + pendingLocalRecords.length})
               </Text>
               {loadingServer && (
                 <ActivityIndicator size="small" color="#059669" className="ml-2" />
@@ -419,10 +440,10 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
             );
           })}
 
-          {/* Real surveys retrieved from Go Backend database for this officer */}
-          {serverRecords.map((item) => (
+          {/* Real surveys retrieved from Go Backend database or cached locally in SQLite */}
+          {unifiedSyncedRecords.map((item) => (
             <Pressable
-              key={`server-${item.id}`}
+              key={`record-${item.id}`}
               onPress={() => setViewingDetailRecord({ ...item, source: 'server' })}
               className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs flex-row items-center justify-between mb-2.5 active:bg-slate-50"
             >
@@ -456,7 +477,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           ))}
 
           {/* Empty state if this officer has no surveys yet */}
-          {serverRecords.length === 0 && pendingLocalRecords.length === 0 && (
+          {unifiedSyncedRecords.length === 0 && pendingLocalRecords.length === 0 && (
             <View className="bg-slate-50 rounded-2xl p-6 items-center justify-center border border-slate-200/80 my-2">
               <View className="w-12 h-12 rounded-full bg-emerald-100 items-center justify-center mb-2">
                 <CheckCircle2 size={24} color="#059669" />
@@ -484,7 +505,7 @@ function AuthenticatedDashboard({ currentUser }: { currentUser: DemoUser }) {
           /* Dedicated Surveys Feed & Explorer View */
           <SurveysTabScreen
             currentUser={currentUser}
-            serverRecords={serverRecords}
+            serverRecords={unifiedSyncedRecords}
             pendingLocalRecords={pendingLocalRecords}
             loadingServer={loadingServer}
             onRefresh={handleRefreshAll}
