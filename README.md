@@ -64,3 +64,20 @@ npx expo start
 npm run typecheck
 ```
 *(Validates 100% type safety with zero errors across all components, hooks, and schemas)*
+
+---
+
+## 5. AI Tools Disclosure
+
+In accordance with candidate instructions, the use of AI tools during the technical assessment is transparently disclosed below:
+
+- **Tools Used**: Google Antigravity Agentic AI Assistant (powered by Google DeepMind reasoning models).
+- **What the Assistant Did Well**:
+  - Accelerated initial screen layouts and form input components matching the GeoSmart Nigeria branding.
+  - Generated TypeScript interfaces and client validation hooks matching the 8 device-tier validation rules.
+- **Where Human Engineering & Corrections Were Required**:
+  - **Offline SQLite Architecture**: Replaced basic in-memory React state with a persistent SQLite database with Write-Ahead Logging (WAL) and local server-cache mirroring, ensuring records stay accessible and editable when offline.
+  - **Persona & State Jurisdiction Lock**: Redesigned authentication so field officers cannot tamper with state dropdowns; their state and LGA boundaries are locked to their validated user profile.
+  - **Two-Phase Bioassay UI**: Built the insectary workflow allowing technicians to resume an existing larval survey offline and complete Day 7 mortality tests.
+- **Author Accountability**: I personally reviewed, tested, and understand every line of code submitted, and can walk through any part of the system during the technical interview.
+
